@@ -1,0 +1,36 @@
+* Resources For SICP :TOC:
+[[https://sarabander.github.io/sicp/][Book]]
+** Read in Emacs with textinfo
+You can download =sicp= package from melpa.
+It's in textinfo format.
+*** Doom Emacs Installation
+Add in =packages.el=
+#+BEGIN_SRC emacs-lisp
+(package! sicp)
+#+END_SRC
+And run =~/emacs.d/bin/doom sync=
+** Videos
+- [[https://www.youtube.com/playlist?list=PLE18841CABEA24090][1986 MIT]]
+- [[https://www.youtube.com/playlist?list=PLVFrD1dmDdvdvWFK8brOVNL7bKHpE-9w0][code_report]]
+- [[https://www.youtube.com/playlist?list=PLhMnuBfGeCDNgVzLPxF9o5UNKG1b-LFY9][2010 Berkeley]]
+* Languages :TOC:
+Book uses mit-scheme.
+Only problem with mit-scheme is it's not usable with org babel.
+So it's hard to solve and show answers in literate way.
+** racket
+*** SICP Installation ways
+**** 1 GUI
+1. Go to File -> Package Manager -> Do What I Mean
+2. Enter sicp
+3. Wait (a lot if nothing happens)
+**** 2 Command line
+Enter
+#+begin_src sh
+raco pkg install sicp
+#+end_src
+*** Can't install SICP package
+#+begin_src sh
+raco pkg config --set catalogs https://download.racket-lang.org/releases/7.9/catalog/ ""
+#+end_src
+** Language for 2010 Berkeley Lessons
+Just paste this [[https://gist.github.com/alexgian/5b351f367169b40a4ad809f0bb718e1f][this]] before your code.
