@@ -127,3 +127,91 @@ Because it's special form =(p)= will never evaluated.
 **** Applicative Order
 First arguments will evaluted.
 =(p)= Compound procedure will create an infinite recursion.
+*** 1.6
+=new-if= is compound procedure which obeys applicative evaluation rules.
+So both clauses will have evaluated before substition for =new-if=.
+#+begin_src racket
+(define (new-if predicate then-clause else-clause)
+  (cond (predicate then-clause)
+        (else else-clause)))
+(new-if (< 3 5) (display "Then\n") (display "Else"))
+#+end_src
+
+#+RESULTS:
+: Then
+: Else
+
+In below code for all =(good-enough? guess x)= values  =else-clause= will be evaluted.
+And it's recursive, so there will be infinite recursion.
+#+begin_src racket
+(define (sqrt-iter guess x)
+  (new-if (good-enough? guess x)
+          guess
+          (sqrt-iter (improve guess x) x)))
+#+end_src
+*** 1.7
+#+name: sqrt-functions
+#+begin_src racket :tangle no
+(define (sqrt-iter guess x)
+  (if (good-enough? guess x)
+      guess
+      (sqrt-iter (improve guess x) x)))
+
+(define (improve guess x)
+  (average guess (/ x guess)))
+
+(define (average x y)
+  (/ (+ x y) 2))
+
+(define (good-enough? guess x)
+  (< (abs (- (square guess) x)) 0.001))
+
+(define (square x) (* x x))
+
+(define (sqrt x)
+  (sqrt-iter 1.0 x))
+#+end_src
+
+For Very Small Numbers
+
+#+begin_src racket :noweb no-export
+<<sqrt-functions>>
+(sqrt 0.0000000000000000000000001232131)
+(sqrt 0.000000000000000000000001)
+#+end_src
+
+#+RESULTS:
+: 0.03125
+: 0.03125
+
+For Big Numbers
+
+#+begin_src racket :noweb no-export
+<<sqrt-functions>>
+(sqrt 10000000000000000000000000000000000000000000000000)
+(sqrt 1000000000000000000000000000000000000000000000000000000000000000000000)
+#+end_src
+
+#+RESULTS:
+: Can't find ...
+: Can't find ...
+
+To understand reason can run with
+#+begin_src racket
+(define (improve guess x)
+  (display "-")
+  (average guess (/ x guess)))
+#+end_src
+With this simple change you can understand how many times =guess= was called.
+In very big numbers =-= becomes longer, in smaller number becomes shorter (eventually becomes 5).
+In very small numbers =0.001= is so small that first guess (=1=) will be halved untill it become =0.03125= because
+Because value of =good-enough?= is already smaller than =0.001=.
+#+begin_src racket :noweb no-export
+<<sqrt-functions>>
+(- (square 0.03125) 0)
+#+end_src
+
+#+RESULTS:
+: 0.0009765625
+
+Can predict that it's harder to satisfy the =0.001= =good-enough?= criteria in big numbers.
