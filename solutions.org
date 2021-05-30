@@ -1,9 +1,10 @@
 #+TITLE: Solutions
 #+PROPERTY: header-args:racket  :lang sicp :exports both
+#+PROPERTY: header-args:racket+ :tangle (concat (car (org-get-outline-path)) "/" (nth 4 (org-heading-components)) ".rkt") :mkdirp yes
 
-* Building Abstractions with Procedures
-** The Elements of Programming
-*** 1.1
+* Chapter-1
+** 1.01
+
 #+begin_src racket
 10
 (+ 5 3 4)
@@ -41,7 +42,8 @@
 6
 16
 #+end_example
-*** 1.2
+** 1.02
+
 #+begin_src racket
 (/ (+ 5
       4
@@ -56,13 +58,15 @@
 
 #+RESULTS:
 : -37/150
-*** TODO 1.3
+** TODO 1.03
 #+begin_quote
 Define a procedure that takes three numbers
 as arguments ...
 #+end_quote
+
 Can't use simple recursion in simple list, need something like =&rest=
 in elisp.
+
 #+begin_src racket
 (define (sum-of-larger-two x y z)
   (- (+ (square x) (square y) (square z))
@@ -75,7 +79,8 @@ in elisp.
 
 #+RESULTS:
 : 41
-*** 1.4
+** 1.04
+
 It does $a + |b|$
 #+begin_src racket
 (define (a-plus-abs-b a b)
@@ -92,8 +97,10 @@ It does $a + |b|$
 : 4
 : 6
 : 4
-*** 1.5
+** 1.05
+
 Goes to infinite loop in scheme interpreters, because they use applicative order by default.
+
 #+begin_src racket
 (define (p) (p))
 (define (test x y)
@@ -103,15 +110,19 @@ Goes to infinite loop in scheme interpreters, because they use applicative order
 
 (test 0 (p))
 #+end_src
-**** Normal Order
+*** Normal Order
+:PROPERTIES:
+:header-args:racket :tangle no
+:END:
+
 Subsitute body of compound procedure
-#+begin_src racket
+#+begin_src racket :tangle no
 (if (= x 0)
     0
     y)
 #+end_src
 Replace =formal parameteres= with actual arguments
-#+begin_src racket
+#+begin_src racket :tangle no
 (if (= 0 0)
     0
     (p))
@@ -124,12 +135,14 @@ whether the interpreter is using normal or applicative order: ..
 #+end_quote
 
 Because it's special form =(p)= will never evaluated.
-**** Applicative Order
+*** Applicative Order
 First arguments will evaluted.
 =(p)= Compound procedure will create an infinite recursion.
-*** 1.6
+** 1.06
+
 =new-if= is compound procedure which obeys applicative evaluation rules.
 So both clauses will have evaluated before substition for =new-if=.
+
 #+begin_src racket
 (define (new-if predicate then-clause else-clause)
   (cond (predicate then-clause)
@@ -143,13 +156,15 @@ So both clauses will have evaluated before substition for =new-if=.
 
 In below code for all =(good-enough? guess x)= values  =else-clause= will be evaluted.
 And it's recursive, so there will be infinite recursion.
+
 #+begin_src racket
 (define (sqrt-iter guess x)
   (new-if (good-enough? guess x)
           guess
           (sqrt-iter (improve guess x) x)))
 #+end_src
-*** 1.7
+** 1.07
+
 #+name: sqrt-functions
 #+begin_src racket :tangle no
 (define (sqrt-iter guess x)
@@ -174,7 +189,7 @@ And it's recursive, so there will be infinite recursion.
 
 For Very Small Numbers
 
-#+begin_src racket :noweb no-export
+#+begin_src racket :noweb eval
 <<sqrt-functions>>
 (sqrt 0.0000000000000000000000001232131)
 (sqrt 0.000000000000000000000001)
@@ -186,7 +201,7 @@ For Very Small Numbers
 
 For Big Numbers
 
-#+begin_src racket :noweb no-export
+#+begin_src racket :noweb eval
 <<sqrt-functions>>
 (sqrt 10000000000000000000000000000000000000000000000000)
 (sqrt 1000000000000000000000000000000000000000000000000000000000000000000000)
@@ -197,15 +212,18 @@ For Big Numbers
 : Can't find ...
 
 To understand reason can run with
+
 #+begin_src racket
 (define (improve guess x)
   (display "-")
   (average guess (/ x guess)))
 #+end_src
+
 With this simple change you can understand how many times =guess= was called.
 In very big numbers =-= becomes longer, in smaller number becomes shorter (eventually becomes 5).
 In very small numbers =0.001= is so small that first guess (=1=) will be halved untill it become =0.03125= because
 Because value of =good-enough?= is already smaller than =0.001=.
+
 #+begin_src racket :noweb no-export
 <<sqrt-functions>>
 (- (square 0.03125) 0)
@@ -215,7 +233,8 @@ Because value of =good-enough?= is already smaller than =0.001=.
 : 0.0009765625
 
 Can predict that it's harder to satisfy the =0.001= =good-enough?= criteria in big numbers.
-*** 1.8
+** 1.08
+
 #+begin_src racket
 (define (cube-root-iter guess x)
   (if (good-enough? guess x)
