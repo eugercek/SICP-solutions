@@ -260,3 +260,277 @@ Can predict that it's harder to satisfy the =0.001= =good-enough?= criteria in b
 
 #+RESULTS:
 : 2.000004911675504
+** 1.09
+I don't know why but I can't change value of =+= in racket.
+So I changed =+= to =sum= from book.
+
+This is recursive process because there are waiting calls (=deferred operations=).
+And because it calls itself in syntax it's recursive procedure too.
+#+begin_src racket :lang racket
+(define (inc x) (+ x 1))
+(define (dec x) (- x 1))
+
+(define (sum a b)
+  (if (= a 0)
+      b
+      (inc (sum (dec a) b))))
+(+ 4 5)
+#+end_src
+: 9
+
+And because it calls itself in syntax it's recursive procedure.
+But it's iterative process, because the way program evole is like rectangle, block.
+Process has state that can be paused and could be resume.
+
+#+begin_src racket :lang racket
+(define (inc x) (+ x 1))
+(define (dec x) (- x 1))
+
+(define (sum a b)
+  (if (= a 0)
+      b
+      (sum (dec a) (inc b))))
+
+(sum 4 5)
+#+end_src
+
+#+RESULTS:
+: 9
+** 1.10
+:PROPERTIES:
+:header-args:racket: :tangle no
+:END:
+#+name: ackermann
+#+begin_src racket
+(define (A x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (A (- x 1) (A x (- y 1))))))
+#+end_src
+
+#+begin_src racket :noweb eval :lang racket
+<<ackermann>>
+(A 1 10)
+(A 2 4)
+(A 3 3)
+#+end_src
+
+#+RESULTS:
+: 1024
+: 65536
+: 65536
+*** (f n)
+
+$f(n) = 2n$
+#+begin_src racket
+(define (f n) (A 0 n))
+#+end_src
+
+*** (g n)
+
+#+begin_src racket
+(define (g n) (A 1 n))
+#+end_src
+
+Let's think =y=0= and =y=1= later.
+=cond= will result in else condition.
+
+#+begin_src racket
+(A 0 (A 1 (- y 1)))
+(A 0 (A 0 (A 1 (- y 1))))
+#+end_src
+
+We know that =(A 0 n)= is =(* 2 n)=
+
+#+begin_src racket
+(* 2 (A 1 (- y 1)))
+(* 2 (* 2(A 1 (- y 1))))
+#+end_src
+
+Recursion will end when =y=0= or =y=1=
+
+Therer will be =y= calls.
+
+#+begin_src racket :lang racket
+(require racket/trace)
+(define (A x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (A (- x 1) (A x (- y 1))))))
+(trace A)
+(A 1 4)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+>(A 1 4)
+> (A 1 3)
+> >(A 1 2)
+> > (A 1 1)
+< < 2
+> >(A 0 2)
+< <4
+> (A 0 4)
+< 8
+>(A 0 8)
+<16
+16
+#+end_example
+
+So $g(n) = 2^n$
+
+*** (h n)
+
+It can seen that each number will go through n times. because we stop at =y=1=
+
+#+begin_src racket
+(A 2 n)
+(A 1 (A 2 (- n 1)))
+(A 1 (A 1 (A 2 (- n 1))))
+#+end_src
+
+Since we know what =(A 1 n)= and =(A 0 n)= we only need to find when all =(A 2 n)= have finished.
+
+The point is where =(A 2 1)= have called.
+
+It'll look like
+
+#+begin_src racket :lang racket :noweb eval
+<<ackermann>>
+(require racket/trace)
+(trace A)
+(A 2 3)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+>(A 2 3)
+> (A 2 2)
+> >(A 2 1)
+< <2
+> (A 1 2)
+> >(A 1 1)
+< <2
+> (A 0 2)
+< 4
+>(A 1 4)
+> (A 1 3)
+> >(A 1 2)
+> > (A 1 1)
+< < 2
+> >(A 0 2)
+< <4
+> (A 0 4)
+< 8
+>(A 0 8)
+<16
+16
+#+end_example
+
+To make it simpler can think like this
+#+begin_src racket
+(A 2 3)
+(A 1 (A 1 (A 2 2)))
+(A 1 (A 1 (A 1 (A 2 1))))
+#+end_src
+
+After that it is just
+
+\[2^{2^{2^{2}}}\]
+
+So informally we can say that $g(n) = 2^{2^{2^{...}}}... n times$
+
+Also we can say
+
+\[h(1) = 2\]
+\[h(n) = 2^{h(n -1)}\]
+
+#+begin_src racket :lang racket :noweb eval
+<<ackermann>>
+(A 2 1)
+(A 2 2)
+(A 2 3)
+#+end_src
+
+#+RESULTS:
+: 2
+: 4
+: 16
+** 1.11
+Question asks different process types, not procedure types so can (and probably must in scheme)
+use (tail) recursion.
+
+Recursive
+#+begin_src racket
+(define (rec-f n)
+  (if (< n 3)
+      n
+      (+ (rec-f (- n 1))
+         (* 2 (rec-f (- n 2)))
+         (* 3 (rec-f (- n 3))))))
+#+end_src
+
+Iterative
+#+begin_src racket :lang racket
+(define (inc x) (+ x 1))
+
+(define (it-f n)
+  (define (iter count fn-3 fn-2 fn-1)
+    (define fn ;; Next item
+      (+ fn-1
+         (* 2 fn-2)
+         (* 3 fn-3)))
+    (cond
+      ((< n 3) n)
+      ((= count (- n 3)) fn)
+      (else
+       (iter (inc count)
+             fn-2 fn-1 fn))))
+  (iter 0 0 1 2))
+#+end_src
+** 1.12
+#+begin_src racket
+(define (pascal n)
+  "Draws n depth pascal triangle"
+  (define (p-value row col)
+    (cond
+      ((or (= row 1)
+           (= col 1)
+           (= row col)) 1)
+      (else
+       (+ (p-value (- row 1) (- col 1))
+          (p-value (- row 1) col)))))
+
+  (define (n-times-i n func)
+    (define (iter count)
+      (cond ((= n count) 1) ;; Random value 1
+            (else
+             (func (+ 1 count)) ;; Pascal triangle uses 1-based index
+             (iter (+ 1 count)))))
+    (iter 0))
+
+  (define (print-rows)
+    (define (print-row row)
+      (define (print-cols)
+        (define (print-col col)
+          (display (p-value row col))
+          (display " "))
+        (n-times-i row print-col))
+      (n-times-i (- n row) (lambda (x) (display " ")))
+      (print-cols) ;; Print all columns
+      (display "\n"));; Then print a newline)
+    (n-times-i n print-row))
+  (print-rows))
+
+(pascal 5)
+#+end_src
+
+#+RESULTS:
+:     1
+:    1 1
+:   1 2 1
+:  1 3 3 1
+: 1 4 6 4 1
+
