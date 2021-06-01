@@ -740,6 +740,7 @@ Trick is in =(if)= everything beside =(remainder)= become pritimitive so it need
   (search (next-odd min-val)))
 
 
+
 (search-for-primes 1000000)
 (search-for-primes 1000000000)
 (search-for-primes 1000000000000)
@@ -748,7 +749,226 @@ Trick is in =(if)= everything beside =(remainder)= become pritimitive so it need
 #+RESULTS:
 :
 : 1000003 *** 12
-: 1000000007 *** 347
-: 1000000000039 *** 10915
+: 1000000007 *** 397
+: 1000000000039 *** 11569
 
 Order of growth in time is $\theta(\sqrt{n})$ each should take $\sqrt{1000} \approx 31.6227$ times more time.
+Reason for using larger number is avoiding dealing with small number inconsistencies.
+** 1.23
+#+begin_src racket :noweb eval
+<<prime-functions>>
+(define (timed-prime-test n)
+  (newline)
+  (display n)
+  (start-prime-test n (runtime)))
+(define (start-prime-test n start-time)
+  (if (prime? n)
+      (report-prime (- (runtime) start-time))))
+(define (report-prime elapsed-time)
+  (display " *** ")
+  (display elapsed-time))
+
+(define (search-for-primes min-val)
+
+  (define (search cur-val)
+    (if (prime? cur-val)
+        (timed-prime-test cur-val)
+        (search (+ 2 cur-val)))) ;; No need for optimization question wants this `primality of consecutive odd integers`
+
+  (define (next n)
+    (if (= n 2)
+        3
+        (+ n 2)))
+
+  (search (next min-val)))
+#+end_src
+
+I've already done this kind of code in 1.22 so there won't be any performance change.
+** 1.24
+#+name: fermat
+#+begin_src racket
+(define (square x) (* x x))
+
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder
+          (square (expmod base (/ exp 2) m))
+          m))
+        (else
+         (remainder
+          (* base (expmod base (- exp 1) m))
+          m))))
+
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else false)))
+#+end_src
+
+#+begin_src racket :noweb yes
+<<fermat>>
+(define (timed-prime-test n)
+  (newline)
+  (display n)
+  (start-prime-test n (runtime)))
+(define (start-prime-test n start-time)
+  (if (fast-prime? n 10)
+      (report-prime (- (runtime) start-time))))
+(define (report-prime elapsed-time)
+  (display " *** ")
+  (display elapsed-time))
+
+(define (search-for-primes min-val)
+
+  (define (search cur-val)
+    (if (fast-prime? cur-val 10)
+        (timed-prime-test cur-val)
+        (search (+ 2 cur-val)))) ;; No need for optimization question wants this `primality of consecutive odd integers`
+
+  (define (next-odd x)
+    (if (= (remainder x 2) 0)
+        (+ x 1)
+        (+ x 2)))
+
+  (search (next-odd min-val)))
+
+
+(search-for-primes 1000000)
+(search-for-primes 1000000000)
+#+end_src
+
+#+RESULTS:
+:
+: 1000003 *** 8
+: 1000000007 *** 11
+
+Difference with normal prime
+|               | Order of Growth | 1000003 | 1000000007 |
+| =(prime?)=      | $\theta(n)$          |      12 |        397 |
+| =(fast-prime?)= | $\theta(\log_2(n))$  |       8 |         11 |
+
+
+Can see why I choose larger number at 1.22  on =1000003= column. It's not very informative about data.
+** 1.25
+#+begin_src racket
+(define (square x) (* x x))
+
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((even? n) (square (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+(define (expmod base exp m)
+  (remainder (fast-expt base exp) m))
+
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else false)))
+
+(fast-prime? 123123123 10)
+#+end_src
+
+#+RESULTS:
+: Long to compute
+
+#+begin_src racket :noweb eval
+<<fermat>>
+(fast-prime? 123123123 10)
+#+end_src
+
+#+RESULTS:
+: #f
+
+Problem is value of =(fast-exp)= is huge.
+We are reducing time of finding huge value it's still huge.
+
+On the other hand normal =(expmod)= takes reaminder of value each step.
+That's why it's not that big.
+** 1.26
+Normal =(expmod)= is this.
+#+begin_src racket
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder
+          (square (expmod base (/ exp 2) m))
+          m))
+        (else
+         (remainder
+          (* base (expmod base (- exp 1) m))
+          m))))
+#+end_src
+
+This is the Louis's version
+#+begin_src racket
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder (* (expmod base (/ exp 2) m)
+                       (expmod base (/ exp 2) m))
+                    m))
+        (else
+         (remainder (* base
+                       (expmod base (- exp 1) m))
+                    m))))
+
+#+end_src
+
+Difference is interpreter first evaluates operand and apply procedure on argument(applicative order).
+So =(expmod base (/ exp 2) m)= won't call twice.
+Processs had an $\theta(\log_2(n))$ order of growth, it's reason is dividing 2 in each step.
+Since we are calling it twice we neutralized it so now it's $\theta(n)$.
+** 1.27
+Carmichael Numbers listed in footnote: 561, 1105, 1729, 2465, 2821, 6601
+
+#+begin_src racket :noweb eval
+(define (square x) (* x x))
+
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder
+          (square (expmod base (/ exp 2) m))
+          m))
+        (else
+         (remainder
+          (* base (expmod base (- exp 1) m))
+          m))))
+
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+
+  (define (iter cur-n)
+    (cond ((= cur-n n) 1)
+    (else (iter (+ 1 cur-n))
+          (try-it cur-n))))
+  (iter 2))
+
+(fermat-test 561)
+(fermat-test 1105)
+(fermat-test 1729)
+(fermat-test 2465)
+(fermat-test 2821)
+(fermat-test 6601)
+#+end_src
+
+#+RESULTS:
+: #t
+: #t
+: #t
+: #t
+: #t
+: #t

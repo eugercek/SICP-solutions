@@ -17,15 +17,9 @@
         (timed-prime-test cur-val)
         (search (+ 2 cur-val)))) ;; No need for optimization question wants this `primality of consecutive odd integers`
 
-  (define (next-odd x)
-    (if (= (remainder x 2) 0)
-        (+ x 1)
-        (+ x 2)))
+  (define (next n)
+    (if (= n 2)
+        3
+        (+ n 2)))
 
-  (search (next-odd min-val)))
-
-
-
-(search-for-primes 1000000)
-(search-for-primes 1000000000)
-(search-for-primes 1000000000000)
+  (search (next min-val)))
