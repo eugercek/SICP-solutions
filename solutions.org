@@ -1034,3 +1034,142 @@ Question says add it in =(square)=
 
 #+RESULTS:
 : #f
+** 1.29
+#+name: sum
+#+begin_src racket :tangle no :eval no
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+         (sum term (next a) next b))))
+#+end_src
+
+
+#+name: integral
+#+begin_src racket :tangle no :eval no
+(define (integral f a b dx)
+  (define (add-dx x)
+    (+ x dx))
+  (* (sum f (+ a (/ dx 2.0)) add-dx b)
+     dx))
+#+end_src
+
+#+begin_src racket :noweb yes
+<<sum>>
+<<integral>>
+
+(define (simpson f a b n)
+
+  (define h (/ (- b a) n))
+  (define (even? x) (= (remainder x 2) 0))
+  (define (cof x)
+    (if ((even? x) 0)
+        2
+        4))
+
+  (define (next-k k) (+ k h))
+
+  (define (f-wrap x)
+    (if (even? x)
+        (* 2 (f x))
+        (* 4 (f x))))
+
+  (* (/ h 3.0) ;; For floating point value
+     (+
+      (f a) ;; First Element
+      (sum  f-wrap (+ a 1) next-k (- b 1))
+      (f b)))) ;; Last element
+
+(define (cube x) (* x x x ))
+
+(simpson cube 0 1 1000)
+#+end_src
+
+#+RESULTS:
+: 0.0003333333333333333
+** 1.30
+#+begin_src racket
+(define (sum term a next b)
+  (define (iter a result)
+    (if
+     (> a b)
+     result
+     (iter
+      (next a) (+ (term a) result))))
+  (iter a 0))
+
+(define (identity x) x)
+(define (sum-integers a b)
+  (sum identity a inc b))
+(sum-integers 1 10)
+#+end_src
+
+#+RESULTS:
+: 55
+** TODO 1.31
+a
+
+Need to decide if inner =(iter)= procedure would be better.
+It'll hide unnecessary =next= and =cur= in recursiv eprocedure all.
+I guess interpreter can understand that, but it would be cleaner.
+When find which one is more schemer(lispier?) approach I'll edit.
+
+I haven't researched but I can't stand that uglieness...
+
+#+name: product
+#+begin_src racket
+(define (product term a b next)
+  (define (iter x)
+    (if (> x b)
+        1
+        (* (term x)
+           (iter (next x)))))
+  (iter a))
+#+end_src
+
+#+name: factorial
+#+begin_src racket :noweb eval
+<<product>>
+(define (factorial n)
+  (product (lambda (x) x) 1 n inc))
+
+(factorial 6)
+#+end_src
+
+#+RESULTS: factorial
+: 720
+
+[[https://en.wikipedia.org/wiki/Wallis_product][Wallis Product]]
+
+Each iteration does
+\[\frac{2n}{2n-1}.\frac{2n}{2n+1} =  \frac{4n^2}{4n^2 - 1 }\]
+
+#+begin_src racket :noweb eval
+<<product>>
+(define  (approx-pi step) ;; One-based index
+  (* 2.0
+     (product (lambda (x)
+                (let ((4n^2 (* 4 (* x x))))
+                  (/ 4n^2
+                     (- 4n^2 1))))
+              1 step inc)))
+(approx-pi 10)
+(approx-pi 100)
+(approx-pi 1000)
+#+end_src
+
+#+RESULTS:
+: 3.067703806643499
+: 3.1337874906281624
+: 3.1408077460303945
+
+b
+
+#+begin_src racket
+(define (product term a b next)
+  (define (iter x acc) ;; acc -> accumulator
+    (if (> x b)
+        acc
+        (iter (next x) (* (term x) acc))))
+  (iter a 1))
+#+end_src
