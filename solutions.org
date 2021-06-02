@@ -1,3 +1,4 @@
+# -*- org-export-babel-evaluate: nil -*-
 #+TITLE: Solutions
 #+PROPERTY: header-args:racket  :lang sicp :exports both
 #+PROPERTY: header-args:racket+ :tangle (concat (car (org-get-outline-path)) "/" (nth 4 (org-heading-components)) ".rkt") :mkdirp yes
@@ -101,7 +102,7 @@ It does $a + |b|$
 
 Goes to infinite loop in scheme interpreters, because they use applicative order by default.
 
-#+begin_src racket
+#+begin_src racket :eval never
 (define (p) (p))
 (define (test x y)
   (if (= x 0)
@@ -112,17 +113,17 @@ Goes to infinite loop in scheme interpreters, because they use applicative order
 #+end_src
 *** Normal Order
 :PROPERTIES:
-:header-args:racket :tangle no
+:header-args:racket: :tangle no
 :END:
 
 Subsitute body of compound procedure
-#+begin_src racket :tangle no
+#+begin_src racket
 (if (= x 0)
     0
     y)
 #+end_src
 Replace =formal parameteres= with actual arguments
-#+begin_src racket :tangle no
+#+begin_src racket
 (if (= 0 0)
     0
     (p))
@@ -972,3 +973,64 @@ Carmichael Numbers listed in footnote: 561, 1105, 1729, 2465, 2821, 6601
 : #t
 : #t
 : #t
+** 1.28
+With random number a less than n, $a^{n-1} \equiv  1 \mod n$
+
+#+name: mr-test
+#+begin_src racket :tangle no :eval never
+(define (mr-test n)
+  (define (try-it a)
+    (= (expmod a (- n 1) n) 1))
+  (try-it (+ 1 (random (- n 1)))))
+#+end_src
+
+For $a \ne 1 , a \neq n-1$ , If $a^2 \equiv 1 \mod n$ then n is not prime.
+Modify the =(expmod)=
+
+#+namem: nt-sqrt
+#+begin_src racket :tangle no :eval never
+(define (nt-sqrt-mod a n) ;; non-trivial-sqaure-root-mod-n
+  (if (or (= a 1) (= a (- n 1)))
+      false
+      (= (remainder (square a) n) 1)))
+#+end_src
+
+Question says add it in =(square)=
+
+#+begin_src racket :noweb yes
+(define (square x) (* x x))
+
+(define (mr-test n)
+  (define (try-it a)
+    (= (expmod a (- n 1) n) 1))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (nt-sqrt-mod a n) ;; non-trivial-sqaure-root-mod-n
+  (if (or (= a 1) (= a (- n 1)))
+      false
+      (= (remainder (square a) n) 1)))
+
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (if (nt-sqrt-mod base m)
+             0
+             (remainder
+              (square (expmod base (/ exp 2) m))
+              m)))
+        (else
+         (remainder
+          (* base (expmod base (- exp 1) m))
+          m))))
+
+(define (mr-prime? n times)
+  (cond ((= times 0) true)
+        ((mr-test n) (mr-prime? n (- times 1)))
+        (else false)))
+
+;; 10 is random value
+(mr-prime? 68 10)
+#+end_src
+
+#+RESULTS:
+: #f
