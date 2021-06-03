@@ -1295,6 +1295,7 @@ It will be do something like this
 
 And there is error 2 is not a procedure that can be applied to arguments.
 ** 1.35
+#+name: fixed-point
 #+begin_src racket
 (define (fixed-point f first-guess)
   (define (close-enough? v1 v2)
@@ -1307,7 +1308,10 @@ And there is error 2 is not a procedure that can be applied to arguments.
           next
           (try next))))
   (try first-guess))
+#+end_src
 
+#+begin_src racket :noweb eval
+<<fixed-point>>
 (fixed-point (lambda (x) (+ 1 (/ 1 x))) 1.0)
 #+end_src
 
@@ -1480,3 +1484,67 @@ I need to find naming convention for iterator procedure in recursive processes.
 
 #+RESULTS:
 : 1.557407724654902
+** 1.40
+#+name: newton
+#+begin_src racket :tangle no :eval no :noweb eval
+<<fixed-point>>
+(define (deriv g)
+  (lambda (x) (/ (- (g (+ x dx)) (g x)) dx)))
+
+(define dx 0.00001)
+
+(define (newton-transform g)
+  (lambda (x) (- x (/ (g x) ((deriv g) x)))))
+
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<newton>>
+(define (cubic a b c)
+  (lambda (x)
+    (+ (* x x x)
+       (* a x x)
+       (* b x)
+       c)))
+(newtons-method (cubic 1 2 3) 1)
+#+end_src
+
+#+RESULTS:
+: -1.2756822036498454
+** 1.41
+#+begin_src racket
+(define (double f)
+  (lambda (x)
+    (f(f x))))
+
+;; (double double)
+;; (lambda (f) (double (double f))) ;; foo
+;; (double (lambda (f) (double (double f))))
+
+;; (double foo)
+;; (lambda (x) (foo(foo x)))
+
+(((lambda (x) ((lambda (f) (double (double f)))
+             ((lambda (f) (double (double f))) x))) inc) 5)
+#+end_src
+
+#+RESULTS:
+: 21
+
+** 1.42
+#+name: compose
+#+begin_src racket
+(define (compose f g)
+  (lambda (x)
+    (f (g x))))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<compose>>
+((compose (lambda (x) (* x x)) inc) 6)
+#+end_src
+
+#+RESULTS:
+: 49
