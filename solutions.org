@@ -1376,7 +1376,8 @@ a
 
 $1/\phi \approx 0.61803398875$
 
-#+begin_src racket
+#+name: cont-frac
+#+begin_src racket :eval no :tangle no
 (define (cont-frac N D k)
   (define (iter i)
     (if (> i k)
@@ -1385,7 +1386,11 @@ $1/\phi \approx 0.61803398875$
            (+ (D i)
               (iter (inc i))))))
   (iter 1))
+#+end_src
 
+
+#+begin_src racket :noweb yes
+<<cont-frac>>
 (cont-frac (lambda (i) 1.0)
            (lambda (i) 1.0) 10)
 
@@ -1401,7 +1406,7 @@ At least 11.
 
 b
 It's easy to write top down approach in recursive processes.
-But in interatives it's more easy to write bottom up.
+But in iteratives, it's more easy to write bottom up.
 
 - Need to add =acc= formal argument.
 - Change if's predicate because bottom up approach
@@ -1430,3 +1435,48 @@ But in interatives it's more easy to write bottom up.
 #+RESULTS:
 : 0.6179775280898876
 : 0.6180555555555556
+** 1.38
+Repeating pattern is.
+
+| mod 3  | 0 | 1 | 2 | 0 | 1 | 2 |
+| Number | x | 1 | 2 | 1 | 1 | 4 |
+
+#+name: e-expansion
+#+begin_src racket
+(define (e-expansion i)
+  (define (mod3 i) (remainder i 3))
+  (if (= (mod3 i) 2)
+      (/ (inc i) 1.5)
+      1))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<cont-frac>>
+<<e-expansion>>
+(define (euler k)
+  (+ 2
+     (cont-frac (lambda (i) 1)
+                e-expansion
+                k)))
+(euler 10)
+#+end_src
+
+#+RESULTS:
+: 2.7182817182817183
+** TODO 1.39
+I need to find naming convention for iterator procedure in recursive processes.
+#+begin_src racket
+(define (tan-cf x k)
+  (define (square x) (* x x))
+  (define (iter i)
+     (if (> i k)
+         0
+         (/ (square x)
+            (- (inc (* 2 i)) (iter (inc i))))))
+  (/ x (- 1.0 (iter 1))))
+
+(tan-cf 1 10)
+#+end_src
+
+#+RESULTS:
+: 1.557407724654902
