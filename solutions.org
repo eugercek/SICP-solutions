@@ -1548,3 +1548,48 @@ I need to find naming convention for iterator procedure in recursive processes.
 
 #+RESULTS:
 : 49
+** 1.43
+Without =(compose)=
+
+#+begin_src racket
+(define (square x) (* x x))
+
+(define (repeated f n)
+  (lambda (x)
+    (define (iter i)
+      (if (> i n)
+          x
+          (f (iter (+ i 1)))))
+    (iter 1)))
+
+((repeated square 2) 5)
+#+end_src
+
+#+RESULTS:
+: 625
+
+With =(compose)=
+
+#+name: repeated
+#+begin_src racket :noweb eval
+<<compose>>
+(define (square x) (* x x))
+
+(define (repeated f n)
+  (if (= n 1)
+      f
+      (compose f (repeated f (- n 1)))))
+#+end_src
+** 1.44
+#+begin_src racket :noweb eval
+<<repeated>>
+(define (smooth f)
+  (let ((dx 0.0001))
+    (lambda (x)
+      (+ (f x)
+         (f (+ x dx))
+         (f (- x dx))))))
+
+(define (n-fold f n)
+  (repeated (smooth f) n))
+#+end_src
