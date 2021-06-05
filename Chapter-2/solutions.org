@@ -72,3 +72,175 @@ One argument =(+)= is =(lambda (x) (* 1 x)=
     (cons (neg (/ n g))
           (/ d g))))
 #+end_src
+* 2.02
+Point procedures
+#+name: point
+#+begin_src racket
+(define (average x y) (/ (+ x y) 2))
+
+(define (make-point x y)
+  (cons x y))
+
+(define (x-point p)
+  (car p))
+
+(define (y-point p)
+  (cdr p))
+
+(define (print-point p)
+  (newline)
+  (display "(")
+  (display (x-point p))
+  (display ",")
+  (display (y-point p))
+  (display ")"))
+#+end_src
+
+Segment procedures
+
+#+name: segment
+#+begin_src racket
+(define (make-segment p1 p2)
+  (cons p1 p2))
+
+(define (start-segment p)
+  (car p))
+
+(define (end-segment p)
+  (cdr p))
+
+(define (midpoint-segment s)
+  (make-point
+   (average (x-point (start-segment s))
+            (x-point (end-segment s)))
+   (average (y-point (start-segment s))
+            (y-point (end-segment s)))))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<point>>
+<<segment>>
+(define p1 (make-point 0 0))
+(define p2 (make-point 10 10))
+
+(define s (make-segment p1 p2))
+
+(print-point (midpoint-segment s))
+#+end_src
+
+#+RESULTS:
+:
+: (5,5)
+
+* 2.03
+#+name: method-1
+#+begin_src racket :noweb eval
+<<point>>
+<<segment>>
+<<compose>>
+<<square>>
+
+(define (make-rect p1 p2 p3 p4)
+  ;; p1 ----seg1----- p2
+  ;;  |               |
+  ;;  s               s
+  ;;  e               e
+  ;;  g               g
+  ;;  3               4
+  ;;  |               |
+  ;; p3 ----seg2----- p4
+  (cons (cons p1 p2)
+        (cons p3 p4)))
+
+(define (p1-rect r)
+ (car (car r)))
+
+(define (p2-rect r)
+ (cdr (car r)))
+
+(define (p3-rect r)
+ (car (cdr r)))
+
+(define (p4-rect r)
+ (cdr (car r)))
+
+(define (h-rect r)
+  (distance (p1-rect r)
+            (p3-rect r)))
+(define (w-rect r)
+  (distance (p1-rect r)
+            (p2-rect r)))
+
+(define (distance p1 p2)
+  (sqrt
+   (+ (square
+       (- (x-point p1 ) (x-point p2)))
+      (square
+       (- (y-point p1 ) (y-point p2))))))
+
+(define (perimiter-rect r)
+  (* 2
+     (+ (h-rect r)
+        (w-rect r))))
+
+(define (area-rect r)
+  (* (h-rect r)
+     (w-rect r)))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<method-1>>
+(define p1 (make-point 0 4))
+(define p2 (make-point 3 4))
+(define p3 (make-point 0 0))
+(define p4 (make-point 3 0))
+
+(define r (make-rect p1 p2 p3 p4))
+
+(perimiter-rect r)
+(area-rect r)
+r
+#+end_src
+
+#+RESULTS:
+: 14
+: 12
+
+#+name: method-2
+#+begin_src racket :noweb eval
+<<point>>
+<<segment>>
+<<compose>>
+<<square>>
+
+(define (make-rect lb h w) ;; left-botton height widht
+  (cons lb
+        (cons h w)))
+
+(define (h-rect r)
+  (car (cdr r)))
+(define (w-rect r)
+  (cdr (cdr r)))
+
+(define (perimiter-rect r)
+  (* 2
+     (+ (h-rect r)
+        (w-rect r))))
+
+(define (area-rect r)
+  (* (h-rect r)
+     (w-rect r)))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<method-2>>
+(define p1 (make-point 0 0))
+(define r (make-rect p1 4 3))
+
+(perimiter-rect r)
+(area-rect r)
+#+end_src
+
+#+RESULTS:
+: 14
+: 12
