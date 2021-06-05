@@ -244,3 +244,65 @@ r
 #+RESULTS:
 : 14
 : 12
+* 2.04
+#+begin_src racket
+(define (cons x y)
+  (lambda (m) (m x y)))
+(define (car z)
+  (z (lambda (p q) p)))
+
+(car (cons 1 2))
+#+end_src
+
+#+RESULTS:
+: 1
+
+=(cons)= returns a procedure which takes one argument and applies other arguments as its
+operand.
+
+=(car)= Takes a [procedure] as argument and applies it to a lambda which returns its first argument.
+
+#+begin_src racket :tangle no :eval no
+(car (cons 1 2))
+(car (lambda (m) (m 1 2)))
+((lambda (m) (m 1 2) (lambda (p q) p)))
+((lambda (p q) p) 1 2)
+1
+#+end_src
+
+cdr
+#+begin_src racket
+(define (cons x y)
+  (lambda (m) (m x y)))
+(define (cdr z)
+  (z (lambda (p q) q)))
+
+(cdr (cons 1 2))
+#+end_src
+
+#+RESULTS:
+: 2
+* 2.05
+#+begin_src racket
+(define (cons a b)
+  (* (expt 2 a)
+     (expt b)))
+
+(define (count base num)
+  (if (= (remainder num base) 0)
+      (+ 1 (count base(/ num base)))
+      0))
+
+(define (car p)
+  (count 2 p))
+
+(define (cdr p)
+  (count 3 p))
+
+(car (cons 5 9))
+(cdr (cons 5 9))
+#+end_src
+
+#+RESULTS:
+: 5
+: 9
