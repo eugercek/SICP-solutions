@@ -306,3 +306,150 @@ cdr
 #+RESULTS:
 : 5
 : 9
+* TODO 2.06
+I don't want to feel idiot about lambda calculus now.
+I want to go through SICP.
+TODO When I start lambda calculus solve this.
+* 2.07
+#+name: interval
+#+begin_src racket
+(define (make-interval a b) (cons a b))
+
+(define (lower-bound i) (car i))
+(define (upper-bound i) (cdr i))
+#+end_src
+* 2.08
+#+begin_src racket :noweb no-export
+<<interval>>
+(define (sub-interval a b)
+  (make-interval
+   (- (lower-bound a) (lower-bound b))
+   (- (upper-bound a) (upper-bound b))))
+#+end_src
+* 2.09
+#+name: mul
+#+begin_src racket :tangle no :eval no
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+#+end_src
+
+#+name: add
+#+begin_src racket :tangle no :eval no
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+#+end_src
+
+In =(add-interval)= and =(sub-interval)= width of interval can be good parameter for finding new intervals width.
+#+begin_src racket :noweb no-export
+<<interval>>
+<<mul>>
+<<add>>
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+(define i1 (make-interval 10 20))
+(define i2 (make-interval 30 50))
+
+(width i1)
+(width i2)
+(width (add-interval i1 i2))
+#+end_src
+
+#+RESULTS:
+: 5
+: 10
+: 15
+
+But in =(mul-interval)= and =(div-interval)= something changes.
+Functions must be give same output for same input.
+If our input source don't contain enough, that operatoin won't be a =function=.
+For example
+
+Width of =(make-interval 0 10)= is 10 also width of =(make-interval 100 110)= is 10.
+If we can create function like $f(w_1, w_2) = w_3$  $w_3$ should not differ with same inputs.
+#+begin_src racket :noweb eval
+<<interval>>
+<<mul>>
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+(define i1 (make-interval 0 10))
+(define i2 (make-interval 100 110))
+
+(width i1)
+(width i2)
+(width (mul-interval i1 (make-interval 5 10)))
+(width (mul-interval i2 (make-interval 5 10)))
+#+end_src
+
+#+RESULTS:
+: 5
+: 5
+: 50
+: 300
+* 2.10
+#+begin_src racket :noweb no-export
+<<interval>>
+<<mul>>
+
+(define (div-interval x y)
+  (if (or (zero? (upper-bound y))
+          (zero? (lower-bound y)))
+      (error "(div-interval x y) Y can't be 0")
+      (mul-interval
+       x
+       (make-interval (/ 1.0 (upper-bound y))
+                      (/ 1.0 (lower-bound y))))))
+
+(div-interval (make-interval 10 20) (make-interval 0 10))
+#+end_src
+
+#+RESULTS:
+: Errrrr
+* TODO 2.11
+These are the 9 conditions
+Left ones have 1 2 right ones have a b
+
+TODO Will add third column
+
+| Interval 1 | Interval 2 |
+| (+ . +)    | (+ . +)    |
+|            |            |
+| (- . -)    | (- . -)    |
+|            |            |
+| (- . -)    | (+ . +)    |
+| (+ . +)    | (- . -)    |
+|            |            |
+| (- . +)    | (+ . +)    |
+| (+ . +)    | (- . +)    |
+|            |            |
+| (- . +)    | (- . -)    |
+| (- . -)    | (- . +)    |
+|            |            |
+| (- . +)    | (- . +)    |
+
+Only last one needs more than 2 multiplication.
+
+This will be very ugly If I wrote this with my narrow FP and DSL knowledge.
+Lots of and , or ...
+TODO When I learn pattern matching, simple macros etc will beauty up this.
+
+#+begin_src racket :noweb eval :eval no :tangle no
+<<interval>>
+
+(define (I p1 p2))
+
+(define (mul-interval a b)
+  ((cond
+     ((I ++ ++ a b) ....)
+   )
+  )
+#+end_src
