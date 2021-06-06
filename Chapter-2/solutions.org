@@ -453,3 +453,149 @@ TODO When I learn pattern matching, simple macros etc will beauty up this.
    )
   )
 #+end_src
+* 2.12
+#+name: center
+#+begin_src racket :noweb no-export
+<<interval>>
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+(define (make-center-percent c p)
+  (make-interval (- c (/ (* c p) 100))
+                 (+ c (/ (* c p) 100))))
+(define (percent i)
+  (/  (* 100 (width i)) (center i)))
+#+end_src
+* 2.13
+To find something writing down equations.
+We know that $p_1$ and $p_2$ are small.
+To find lower bound of interval.
+I  think we can say that (in ver small numbers)
+\[\frac{c_1(100-p_1)}{100} \frac{c_2(100-p_2)}{100} \approx \frac{c_1c_2(10^4 - 100(p_1 + p_2) +p_1p_2)}{10^4}\]
+
+$p_1p_2$ is multiplication of two small numbers to we can ignore it.
+
+\[\frac{c_1c_2(10^2 -(p_1 + p_2))}{10^2}\]
+Percent is $(1 -\frac{p_1 + p_2}{100}))$
+
+We are talking about the little one. How much far from center.
+So Percent is $p_1 + p_2$
+
+#+begin_src racket :noweb no-export
+<<center>>
+<<mul>>
+
+
+(percent (mul-interval (make-center-percent 10000 0.001)
+              (make-center-percent 10000 0.001)))
+(+ 0.001 0.001)
+
+(percent (mul-interval (make-center-percent 100000000 0.00001)
+              (make-center-percent 100000000 0.00001)))
+(+ 0.00001 0.00001)
+#+end_src
+
+#+RESULTS:
+: 0.001999999999807451
+: 0.002
+: 1.99999999999998e-05
+: 2e-05
+
+* 2.14
+Trying to satisfy Lem E. Tweakit
+
+#+name: div
+#+begin_src racket :tangle no :eval no
+(define (div-interval x y)
+  (if (or (zero? (upper-bound y))
+          (zero? (lower-bound y)))
+      (error "(div-interval x y) Y can't be 0")
+      (mul-interval
+       x
+       (make-interval (/ 1.0 (upper-bound y))
+                      (/ 1.0 (lower-bound y))))))
+#+end_src
+
+They're really different
+#+begin_src racket :noweb no-export
+<<center>>
+<<add>>
+<<mul>>
+<<div>>
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2)
+                (add-interval r1 r2)))
+(define (par2 r1 r2)
+  (let ((one (make-interval 1 1)))
+    (div-interval
+     one (add-interval (div-interval one r1)
+                       (div-interval one r2)))))
+
+(define r1 (make-interval 10 20))
+(define r2 (make-interval 10 20))
+
+(par1 r1 r2)
+(par2 r1 r2)
+#+end_src
+
+#+RESULTS:
+: (2.5 . 20.0)
+: (5.0 . 10.0)
+
+With pen and paper it can be seen that =(par2)= gives true output.
+
+#+name: p1
+#+begin_src racket :noweb eval
+<<center>>
+<<add>>
+<<mul>>
+<<div>>
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2)
+                (add-interval r1 r2)))
+
+(define r1 (make-interval 10 20))
+(define r2 (make-interval 10 20))
+
+(par1 r1 r2) ;; 2.5 Wrong
+
+(mul-interval r1 r2) ;; 100 True
+
+(add-interval r1 r2);; 20 True
+
+(div-interval ;; Should be 5 but 2.5
+ (mul-interval r1 r2)
+ (add-interval r1 r2))
+
+;; (define (div-interval x y)
+;;   (if (or (zero? (upper-bound y))
+;;           (zero? (lower-bound y)))
+;;       (error "(div-interval x y) Y can't be 0")
+;;       (mul-interval
+;;        x
+;;        (make-interval (/ 1.0 (upper-bound y))
+;;                       (/ 1.0 (lower-bound y))))))
+
+(mul-interval (make-interval 100 400)
+              (make-interval
+               (/ 1.0 40)
+               (/ 1.0 20)))
+
+(* 100 (/ 1.0 40)) ;; This is the prolem
+#+end_src
+#+RESULTS:
+: (2.5 . 20.0)
+: (100 . 400)
+: (20 . 40)
+: (2.5 . 20.0)
+: (2.5 . 20.0)
+: 0.025
+: 0.05
+
+Because boundraies are changed in =(mul-divide)= values are changed too.
