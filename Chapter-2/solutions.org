@@ -700,3 +700,82 @@ In this
 
 Difference between =(cons)= with this way you are creating same level pairs(lists).
 So it won't nest up.
+* 2.19
+Order of coins should not effect result because tree will expand for every possible way.
+#+begin_src racket
+(define (cc amount coin-values)
+  (define (no-more? l) (null? l))
+  (define (except-first-denomination l) (cdr l))
+  (define (first-denomination l) (car l))
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (no-more? coin-values)) 0)
+        (else
+         (+ (cc amount
+                (except-first-denomination
+                 coin-values))
+            (cc (- amount
+                   (first-denomination
+                    coin-values))
+                coin-values)))))
+
+(define us-coins (list 50 25 10 5 1))
+(define fake-us-coins (list 1 10 25 5 50))
+
+(cc 100 us-coins)
+(cc 100 fake-us-coins)
+#+end_src
+
+#+RESULTS:
+: 292
+: 292
+: 104561
+* TODO 2.20
+Iterative way
+#+begin_src racket
+(define (same-parity base . l)
+  (define (mod2 x) (remainder x 2))
+  (define (iter l acc)
+    (if (null? l)
+        acc
+        (iter (cdr l)
+              (if (= (mod2 base) (mod2 (car l)))
+                  (append acc (list (car l)))
+                  acc))))
+  (iter l (list base)))
+#+end_src
+
+Recursive way
+
+#+begin_src racket
+(define (same-parity base . l)
+  (define (same? x)
+    (= (remainder base 2)
+       (remainder x 2)))
+
+  (define (iter l)
+    (if (null? (cdr l)) ;; Saved 1 call with cdr :)))
+        l
+        (append (if (same? (car l))
+                    (list (car l))
+                    (list))
+                (iter (cdr l)))))
+  (cons base (iter l)))
+(same-parity 1 2 3 4 5 6 7)
+#+end_src
+
+#+RESULTS:
+: (1 3 5 7)
+
+This solution relies on the fact that you can append empty list without problem.
+
+#+begin_src racket
+(list 1 2 3 (list) 4 5 6)
+(append (list 1 2 3) (list) (list 4 5 6))
+#+end_src
+
+#+RESULTS:
+: (1 2 3 () 4 5 6)
+: (1 2 3 4 5 6)
+
+But using append is not very good for time complexity one should try to prepend with =(cons)= and =(reverse)= at the end.
+But I don't know how to flatten the list so it's TODO.
