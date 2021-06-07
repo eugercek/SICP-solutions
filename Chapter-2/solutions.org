@@ -599,3 +599,104 @@ With pen and paper it can be seen that =(par2)= gives true output.
 : 0.05
 
 Because boundraies are changed in =(mul-divide)= values are changed too.
+* 2.17
+#+begin_src racket
+(define (last-pair elements)
+  (if (null? (cdr elements))
+             elements
+             (last-pair (cdr elements))))
+
+(last-pair (list 1 2 3 4 5))
+#+end_src
+
+#+RESULTS:
+: (5)
+* 2.18
+Iterative way
+
+#+begin_src racket
+(define (reverse elements)
+  (define (iter l result)
+    (if (null? l)
+        result
+          (iter (cdr l) (cons (car l) result))))
+  (iter elements (list )))
+
+(reverse (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (3 2 1)
+
+Recursive way
+
+This is wrong
+#+begin_src racket :tangle no :eval no
+(define (reverse l)
+  (if (null? (cdr l))
+      l
+      (append (reverse (cdr l))
+                       (car l))))
+
+(reverse (list 1 2 3))
+#+end_src
+
+Because it expands like this last. Can see the problem in last line.
+
+#+begin_src racket :tangle no :eval no
+(append (reverse (list 2 3)) 1)
+(append (append (reverse (list  3)) 2) 1)
+(append (append (list 3) 2) 1)
+(append (append (list 3) 2) 1)
+#+end_src
+
+When you append a atom to a a list it becomes pair because only difference between a pair and a list is
+lists have =nil= at the end.
+And you can =(append)= more to that pair because it'll never have =nil=.
+
+#+begin_src racket :tangle no
+(append (list 1 2 3) 2)
+#+end_src
+
+#+RESULTS:
+: (1 2 3 . 2)
+
+But that reverse will work for two pair because you don't need to =(append)= more.
+#+begin_src racket
+(define (reverse l)
+  (if (null? (cdr l))
+      l
+      (append (reverse (cdr l))
+                       (car l))))
+
+(reverse (list 1 2))
+#+end_src
+
+#+RESULTS:
+: (2 . 1)
+
+For solution you need to =(append)= a list not an atom.
+#+begin_src racket
+(define (reverse l)
+  (if (null? (cdr l))
+      l
+      (append (reverse (cdr l))
+                       (list (car l)))))
+
+(reverse (list 1 2 3 4))
+#+end_src
+
+#+RESULTS:
+: (4 3 2 1)
+
+In this
+#+begin_src racket :tangle no :eval no
+(append (reverse (list 2 3)) (list 1))
+(append (append (reverse (list 3)) (list 2)) (list 1))
+(append (append (list 3) (list 2)) (list 1))
+(append (list 3 2) (list 1))
+(append (list 3 2 1))
+#+end_src
+
+Difference between =(cons)= with this way you are creating same level pairs(lists).
+So it won't nest up.
