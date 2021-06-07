@@ -619,7 +619,7 @@ Iterative way
   (define (iter l result)
     (if (null? l)
         result
-          (iter (cdr l) (cons (car l) result))))
+        (iter (cdr l) (cons (car l) result))))
   (iter elements (list )))
 
 (reverse (list 1 2 3))
@@ -779,3 +779,70 @@ This solution relies on the fact that you can append empty list without problem.
 
 But using append is not very good for time complexity one should try to prepend with =(cons)= and =(reverse)= at the end.
 But I don't know how to flatten the list so it's TODO.
+
+* 2.21
+#+name: sq
+#+begin_src racket :tangle no :eval no
+(define (square x) (* x x))
+#+end_src
+
+#+begin_src racket :noweb no-export
+<<sq>>
+(define (square-list items)
+  (if (null? items)
+      (list)
+      (cons
+       (square (car items)) (square-list (cdr items)))))
+
+
+(define (square-list items)
+  (map square items))
+
+(square-list (list 1 2 3 4))
+#+end_src
+* 2.22
+Problem is =answer= has the previous values why it's on right side.
+#+begin_src racket :noweb no-export
+<<sq>>
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+        answer
+        (iter (cdr things)
+              (cons (square (car things))
+                    answer))))
+  (iter items nil))
+
+(square-list (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (9 4 1)
+
+In first =(cons)= probleem can seen. It evaluates this =(cons nil 1)=.
+In second =(cons)= it evaluates =(cons (cons nil 1) 4)=
+It nests up to handle this, can use =(append)=.
+#+begin_src racket :noweb eval
+<<sq>>
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+        answer
+        (iter (cdr things)
+              (cons answer
+                    (square (car things))))))
+  (iter items nil))
+
+(square-list (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (((() . 1) . 4) . 9)
+* 2.23
+#+begin_src racket
+(define (for-each f l)
+  (cond ((null? l) #t)
+        (else
+         (f (car l))
+         (for-each f (cdr l)))))
+#+end_src
