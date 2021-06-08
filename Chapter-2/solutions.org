@@ -843,6 +843,30 @@ It nests up to handle this, can use =(append)=.
 (define (for-each f l)
   (cond ((null? l) #t)
         (else
-         (f (car l))
+        (f (car l))
          (for-each f (cdr l)))))
 #+end_src
+* 2.24
+#+begin_src racket :lang racket
+(require sdraw)
+(define (draw t) (sdraw t #:null-style '/))
+(draw (list 1 (list 2 (list 3 4))))
+#+end_src
+* 2.25
+[[https://stackoverflow.com/questions/67680068/shorthand-for-car-and-cdr][Scheme provides car/cdr combinations up to 4 step]]
+=l3= is a good example that shows =cdr= points whole pair not the first element of pair.
+=car= of =cdr= points first element in pair.
+
+#+begin_src racket
+(define l1 (list 1 3 (list 5 7) 9))
+(define l2 (list (list 7)))
+(define l3 (list 1 (list 2 (list 3 (list 4 (list 5 (list 6 7)))))))
+(car (cdaddr l1))
+(caar l2)
+(cadadr (cadadr (cadadr l3)))
+#+end_src
+
+#+RESULTS:
+: 7
+: 7
+: 7
