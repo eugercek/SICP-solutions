@@ -886,6 +886,10 @@ It nests up to handle this, can use =(append)=.
 : ((1 2 3) (4 5 6))
 * 2.27
 Iterative way
+
+Generally iterative way is good for reverse operations.
+Because we can use =(cons)= (it's =\theta(n)= ).
+
 #+begin_src racket
 (define (deep-reverse l)
   (define (iter cur r)
@@ -898,13 +902,15 @@ Iterative way
                    (car cur))
                r))))
   (iter l (list)))
-#+end_src
 
+(deep-reverse (list (list 1 2) (list 3 4)))
+#+end_src
 Recursive way
 
 Key point is when you =(append)= two list they lose their level and become one.
 If you don't want this just wrap =cdr= one with =(list)=
 And you can't take =(cdr)= or =(car)= of an atom so handle that.
+
 #+begin_src racket
 (define (deep-reverse l)
   (cond ((null? l) nil)
@@ -916,8 +922,44 @@ And you can't take =(cdr)= or =(car)= of an atom so handle that.
 #+end_src
 
 Found this [[http://community.schemewiki.org/?sicp-ex-2.27][on internet]]
-Very good solution.
+Very good solution *for only list of lists*.
+
 #+begin_src racket
 (define (deep-reverse l)
   (reverse (map reverse l)))
+
 #+end_src
+
+Found this [[http://community.schemewiki.org/?sicp-ex-2.27][on the same site]]
+Very good solution.
+
+#+begin_src racket
+(define (deep-reverse t)
+   (if (pair? t)
+       (reverse (map deep-reverse t))
+       t))
+#+end_src
+
+* 2.28
+=((null? l) l)= is necessary because we need to wrap non atoms with =(list)=.
+We need because if you don't wrap with  =(list)= you'll end up with pair =( 1 2 3 4 . 5)= or error
+because you can't =(append 1 (list 2 3))= use =append= like this.
+
+A little advice always write and think inductive part first.
+Then you'll see what edge cases you'll have.
+
+#+begin_src racket
+(define (fringe l)
+  (cond
+    ((null? l) l)
+    ((not (pair? l)) (list l))
+    (else
+     (append (fringe (car l))
+             (fringe (cdr l))))))
+
+(define l (list (list 1 2) (list 3 4)))
+(fringe l)
+#+end_src
+
+#+RESULTS:
+: (1 2 3 4)
