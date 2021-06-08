@@ -870,3 +870,54 @@ It nests up to handle this, can use =(append)=.
 : 7
 : 7
 : 7
+* 2.26
+#+begin_src racket
+(define x (list 1 2 3))
+(define y (list 4 5 6))
+
+(append x y)
+(cons x y)
+(list x y)
+#+end_src
+
+#+RESULTS:
+: (1 2 3 4 5 6)
+: ((1 2 3) 4 5 6)
+: ((1 2 3) (4 5 6))
+* 2.27
+Iterative way
+#+begin_src racket
+(define (deep-reverse l)
+  (define (iter cur r)
+    (if (null? cur)
+        r
+        (iter
+         (cdr cur)
+         (cons (if (pair? (car cur))
+                   (deep-reverse (car cur))
+                   (car cur))
+               r))))
+  (iter l (list)))
+#+end_src
+
+Recursive way
+
+Key point is when you =(append)= two list they lose their level and become one.
+If you don't want this just wrap =cdr= one with =(list)=
+And you can't take =(cdr)= or =(car)= of an atom so handle that.
+#+begin_src racket
+(define (deep-reverse l)
+  (cond ((null? l) nil)
+        ((not (pair? l)) l)
+        (else
+         (append
+          (deep-reverse (cdr l))
+          (list (deep-reverse (car l)))))))
+#+end_src
+
+Found this [[http://community.schemewiki.org/?sicp-ex-2.27][on internet]]
+Very good solution.
+#+begin_src racket
+(define (deep-reverse l)
+  (reverse (map reverse l)))
+#+end_src
