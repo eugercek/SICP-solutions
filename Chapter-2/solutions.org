@@ -1050,3 +1050,45 @@ We are only changing selector which contains =(cadr)= to =(cdr)=.
 
 #+RESULTS:
 : 21
+* 2.30
+Without =(map)=
+#+begin_src racket :noweb eval
+<<sq>>
+(define (square-tree t)
+  (cond
+    ((null? t) t)
+    ((not (pair? t)) (square t))
+    (else
+     (cons (square-tree (car t))
+        (square-tree (cdr t))))))
+#+end_src
+
+With =(map)=
+#+begin_src racket :noweb eval
+<<sq>>
+(define (square-tree t)
+  (map (lambda (sub-t)
+         (if (pair? sub-t)
+             (square-tree sub-t)
+             (square sub-t)))
+       t))
+(square-tree (list 1 2 (list 3 4)))
+#+end_src
+* 2.31
+#+begin_src racket :noweb eval
+<<sq>>
+(define (treemap fn t)
+  (map (lambda (sub-t)
+         (if (pair? sub-t)
+             (treemap fn sub-t)
+             (fn sub-t))
+         ) t))
+
+(define (square-tree t)
+  (treemap square t))
+
+(square-tree (list (list 1 2) (list 3 4) 5))
+#+end_src
+
+#+RESULTS:
+: ((1 4) (9 16) 25)
