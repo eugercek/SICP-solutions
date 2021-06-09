@@ -11,7 +11,7 @@
   (if (null? (cdr l))
       l
       (append (reverse (cdr l))
-                       (car l))))
+              (car l))))
 
 (reverse (list 1 2))
 
@@ -19,6 +19,6 @@
   (if (null? (cdr l))
       l
       (append (reverse (cdr l))
-                       (list (car l)))))
+              (list (car l)))))
 
 (reverse (list 1 2 3 4))

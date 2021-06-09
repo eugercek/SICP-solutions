@@ -16,16 +16,16 @@
         (cons p3 p4)))
 
 (define (p1-rect r)
- (car (car r)))
+  (car (car r)))
 
 (define (p2-rect r)
- (cdr (car r)))
+  (cdr (car r)))
 
 (define (p3-rect r)
- (car (cdr r)))
+  (car (cdr r)))
 
 (define (p4-rect r)
- (cdr (car r)))
+  (cdr (car r)))
 
 (define (h-rect r)
   (distance (p1-rect r)

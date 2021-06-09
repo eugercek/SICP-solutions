@@ -26,9 +26,9 @@
 
 
 (percent (mul-interval (make-center-percent 10000 0.001)
-              (make-center-percent 10000 0.001)))
+                       (make-center-percent 10000 0.001)))
 (+ 0.001 0.001)
 
 (percent (mul-interval (make-center-percent 100000000 0.00001)
-              (make-center-percent 100000000 0.00001)))
+                       (make-center-percent 100000000 0.00001)))
 (+ 0.00001 0.00001)

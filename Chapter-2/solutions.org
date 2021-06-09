@@ -153,16 +153,16 @@ Segment procedures
         (cons p3 p4)))
 
 (define (p1-rect r)
- (car (car r)))
+  (car (car r)))
 
 (define (p2-rect r)
- (cdr (car r)))
+  (cdr (car r)))
 
 (define (p3-rect r)
- (car (cdr r)))
+  (car (cdr r)))
 
 (define (p4-rect r)
- (cdr (car r)))
+  (cdr (car r)))
 
 (define (h-rect r)
   (distance (p1-rect r)
@@ -450,8 +450,8 @@ TODO When I learn pattern matching, simple macros etc will beauty up this.
 (define (mul-interval a b)
   ((cond
      ((I ++ ++ a b) ....)
+     )
    )
-  )
 #+end_src
 * 2.12
 #+name: center
@@ -493,11 +493,11 @@ So Percent is $p_1 + p_2$
 
 
 (percent (mul-interval (make-center-percent 10000 0.001)
-              (make-center-percent 10000 0.001)))
+                       (make-center-percent 10000 0.001)))
 (+ 0.001 0.001)
 
 (percent (mul-interval (make-center-percent 100000000 0.00001)
-              (make-center-percent 100000000 0.00001)))
+                       (make-center-percent 100000000 0.00001)))
 (+ 0.00001 0.00001)
 #+end_src
 
@@ -603,8 +603,8 @@ Because boundraies are changed in =(mul-divide)= values are changed too.
 #+begin_src racket
 (define (last-pair elements)
   (if (null? (cdr elements))
-             elements
-             (last-pair (cdr elements))))
+      elements
+      (last-pair (cdr elements))))
 
 (last-pair (list 1 2 3 4 5))
 #+end_src
@@ -636,7 +636,7 @@ This is wrong
   (if (null? (cdr l))
       l
       (append (reverse (cdr l))
-                       (car l))))
+              (car l))))
 
 (reverse (list 1 2 3))
 #+end_src
@@ -667,7 +667,7 @@ But that reverse will work for two pair because you don't need to =(append)= mor
   (if (null? (cdr l))
       l
       (append (reverse (cdr l))
-                       (car l))))
+              (car l))))
 
 (reverse (list 1 2))
 #+end_src
@@ -681,7 +681,7 @@ For solution you need to =(append)= a list not an atom.
   (if (null? (cdr l))
       l
       (append (reverse (cdr l))
-                       (list (car l)))))
+              (list (car l)))))
 
 (reverse (list 1 2 3 4))
 #+end_src
@@ -843,7 +843,7 @@ It nests up to handle this, can use =(append)=.
 (define (for-each f l)
   (cond ((null? l) #t)
         (else
-        (f (car l))
+         (f (car l))
          (for-each f (cdr l)))))
 #+end_src
 * 2.24
@@ -935,9 +935,9 @@ Very good solution.
 
 #+begin_src racket
 (define (deep-reverse t)
-   (if (pair? t)
-       (reverse (map deep-reverse t))
-       t))
+  (if (pair? t)
+      (reverse (map deep-reverse t))
+      t))
 #+end_src
 
 * 2.28
@@ -963,3 +963,90 @@ Then you'll see what edge cases you'll have.
 
 #+RESULTS:
 : (1 2 3 4)
+* 2.29
+[[https://en.wikipedia.org/wiki/Mobile_(sculpture)][Mobile]] is a type of sculpture.
+
+#+name: makes
+#+begin_src racket
+(define (make-mobile left right) ;; left-branch and right-branch
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+#+end_src
+
+a
+
+#+name: sels
+#+begin_src racket
+(define (left-branch mobile)
+  (car mobile))
+
+(define (right-branch mobile)
+  (cadr mobile))
+
+(define (branch-length branch)
+  (car branch))
+
+(define (branch-structure branch)
+  (cadr branch))
+#+end_src
+
+b
+
+This part took a lot of time for me because I crated wrong =mobile= in =(make-mobile)=.
+Be careful about that. While creating an object always think what =constructor= means
+
+Again first think inductive step. Then think it's edge cases, (base cases).
+
+#+name: wei
+#+begin_src racket :noweb eval
+<<makes>>
+<<sels>>
+(define (total-weight m)
+  (cond ((null? m) 0)
+        ((not (pair? m)) m)
+        (else
+         (+ (total-weight (branch-structure (left-branch m)))
+            (total-weight (branch-structure (right-branch m)))))))
+#+end_src
+
+c
+
+Question said
+#+begin_quote
+Design a predicate that tests whether a binary mobile is balanced.
+#+end_quote
+
+That's why =(balanced?)= has =?= at the end. It's scheme's convention.
+
+#+begin_src racket :noweb eval
+<<wei>>
+(define (balanced? m)
+  (cond
+    ((null? m) #t)
+    ((not (pair? m)) #t) ;; No need to look a weight's left, right branches and its children because
+    ;; There are none
+    (else
+     (and (= (torque (left-branch m))
+             (torque (right-branch m)))
+          (balanced? (branch-structure (left-branch m)))
+          (balanced? (branch-structure (right-branch m)))))))
+
+(define (torque b)
+  (* (branch-length b) (total-weight (branch-structure b))))
+#+end_src
+
+d
+
+I think =(cons)= is better representation since mobile is binary.
+We are only changing selector which contains =(cadr)= to =(cdr)=.
+#+begin_src racket
+(define (right-branch mobile)
+  (cdr mobile))
+(define (branch-structure branch)
+  (cdr branch))
+#+end_src
+
+#+RESULTS:
+: 21

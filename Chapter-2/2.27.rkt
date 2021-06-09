@@ -24,6 +24,6 @@
   (reverse (map reverse l)))
 
 (define (deep-reverse t)
-   (if (pair? t)
-       (reverse (map deep-reverse t))
-       t))
+  (if (pair? t)
+      (reverse (map deep-reverse t))
+      t))
