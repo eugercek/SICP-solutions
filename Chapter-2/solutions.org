@@ -1168,3 +1168,26 @@ And code works! There is too little to write I don't make mistake.
 
 #+RESULTS:
 : 5
+* 2.36
+=(map)= can take more than one sequence as argument.
+
+#+begin_src racket :noweb eval
+<<acc>>
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      nil
+      (cons (accumulate op init
+                        (map car seqs))
+            (accumulate-n op init
+                          (map cdr seqs)))))
+(define l (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
+(accumulate-n + 0 l)
+#+end_src
+
+#+RESULTS:
+: (22 26 30)
+
+Untill now always used map for computing something, but with =(car)=, =(map)= showed it potential for me.
+But I started to worry about efficency from internet I learned I should don't care about efficency untill book say.
+
+Also notice that =(map cdr seqs)= actually does =(cadr)= because it'll evaluate =(car)= in upper call.
