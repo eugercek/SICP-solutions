@@ -1188,6 +1188,17 @@ And code works! There is too little to write I don't make mistake.
 : (22 26 30)
 
 Untill now always used map for computing something, but with =(car)=, =(map)= showed it potential for me.
-But I started to worry about efficency from internet I learned I should don't care about efficency untill book say.
 
 Also notice that =(map cdr seqs)= actually does =(cadr)= because it'll evaluate =(car)= in upper call.
+
+#+begin_quote
+But I started to worry about efficency from internet I learned I should don't care about efficency untill book say.
+#+end_quote
+
+I said this in previous commit I didn't amend it because I think this is good case for writing
+Because we are dealing with linked lists I always think another \theta(n) complexity etc.
+But in this example we are trimming down the list so every list operation is \theta(1) because =(car)=.
+And I hope =(cdr)= is taken from enviroment...
+
+I'll quote upper paragraph too when I have answer.
+
