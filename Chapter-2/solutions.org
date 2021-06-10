@@ -1106,3 +1106,33 @@ Subset of =(1 2 3)= is subset of =(2 3)= and =1= inserted into subset of =(2 3)=
                      rest)))))
 (subsets (list 1 2 3))
 #+end_src
+* 2.33
+This exercise was mind blowing.
+Not because of its hardness it shows the face that =(accumualte)= generalizes everything.
+And code works! There is too little to write I don't make mistake.
+
+#+name: acc
+#+begin_src racket :tangle no :eval no
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<acc>>
+(define (map p sequence)
+  (accumulate (lambda (x y)
+                (cons (p x) y))
+              nil sequence))
+
+(define (append seq1 seq2)
+  (accumulate cons
+              seq2 seq1))
+
+(define (length sequence)
+  (accumulate
+   (lambda (x y) (inc y))
+   0 sequence))
+#+end_src
