@@ -1092,3 +1092,17 @@ With =(map)=
 
 #+RESULTS:
 : ((1 4) (9 16) 25)
+* 2.32
+Subset of =(1 2 3)= is subset of =(2 3)= and =1= inserted into subset of =(2 3)= pattern is this.
+
+#+begin_src racket
+(define (subsets s)
+  (if (null? s)
+      (list '())
+      (let ((rest (subsets (cdr s))))
+        (append rest
+                (map (lambda (x)
+                       (cons (car s) x))
+                     rest)))))
+(subsets (list 1 2 3))
+#+end_src
