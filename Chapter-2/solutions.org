@@ -1108,7 +1108,7 @@ Subset of =(1 2 3)= is subset of =(2 3)= and =1= inserted into subset of =(2 3)=
 #+end_src
 * 2.33
 This exercise was mind blowing.
-Not because of its hardness it shows the face that =(accumualte)= generalizes everything.
+Not because of its hardness it shows the face that =(accumulate)= generalizes everything.
 And code works! There is too little to write I don't make mistake.
 
 #+name: acc
@@ -1171,6 +1171,7 @@ And code works! There is too little to write I don't make mistake.
 * 2.36
 =(map)= can take more than one sequence as argument.
 
+#+name: accn
 #+begin_src racket :noweb eval
 <<acc>>
 (define (accumulate-n op init seqs)
@@ -1180,9 +1181,14 @@ And code works! There is too little to write I don't make mistake.
                         (map car seqs))
             (accumulate-n op init
                           (map cdr seqs)))))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<accn>>
 (define l (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
 (accumulate-n + 0 l)
 #+end_src
+
 
 #+RESULTS:
 : (22 26 30)
@@ -1201,4 +1207,227 @@ But in this example we are trimming down the list so every list operation is \th
 And I hope =(cdr)= is taken from enviroment...
 
 I'll quote upper paragraph too when I have answer.
+* 2.37
+Books says that
+#+begin_quote
+Which are described in any book on matrix algebra
+#+end_quote
 
+So I assume that these are normal matrix multiplication.
+If not, there will be problem with the fact that for matrix multiplication
+first element's column's nubmer must be same with second element's row's number.
+
+#+name: rand-data
+#+begin_src racket :tangle no :eval no
+(define v1 (list 1 2 3))
+(define v2 (list 4 5 6))
+
+(define m1
+  (list (list 1 2 3)
+        (list 4 5 6)
+        (list 7 8 9)))
+
+(define m2
+  (list (list 1 2 3)
+        (list 4 5 6)
+        (list 0 0 0)))
+#+end_src
+
+#+name: dot
+#+begin_src racket :tangle no :eval no :noweb eval
+<<accn>>
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+#+end_src
+
+Actually you can multiply if column number of first element is not equal to row number of second element.
+But if first one's column is larger then larger parts won't be in equation.
+If second one's row's are larger then larger parts won't be in equation.
+
+TODO I will find why this is Like that I searched a little but couldn't find simple answer.
+Found [[https://www.amazon.com/Coding-Matrix-Algebra-Applications-Computer/dp/0615880991][this]] book look promising.
+
+Beside math below code is very simple.
+We only need to dot product rows of first to *column* of second because we only have one row it's sequence of numbers.
+
+And we represent =(list 1 2 3)= as
+\begin{bmatrix}
+1 \\
+2 \\
+3 \\
+\end{bmatrix}
+
+We need to apply =(dot-product)=  on the list of rows.
+
+=(map)= gives elemetns of list once at time, since elements of list are rows we can what we want.
+
+#+begin_src racket :noweb eval
+<<dot>>
+(define (matrix-*-vector m v)
+   (map (lambda (m-row) (dot-product m-row v))
+        m))
+#+end_src
+
+
+#+name: mv
+#+begin_src racket :tangle no :eval no :noweb eval
+<<dot>>
+<<rand-data>>
+(define (matrix-*-vector m v)
+  (if (not (= (length (car m))
+              (length v)))
+      #f ;; Can't multiply
+      (map (lambda  (row)
+             (dot-product row v))
+           m)))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<mv>>
+(matrix-*-vector m1 v1)
+#+end_src
+
+#+RESULTS:
+: (14 32 50)
+
+But output look like
+\begin{bmatrix}
+14 \\
+32 \\
+50 \\
+\end{bmatrix}
+
+TODO But shoud look like
+\begin{bmatrix}
+14 & 32 & 50
+\end{bmatrix}
+
+
+Just make the transition row-> column column->row.
+
+Main idea is this
+
+#+begin_src racket :noweb eval
+<<dot>>
+<<rand-data>>
+(map car m1)
+(map cadr m1)
+(map caddr m1)
+#+end_src
+
+#+RESULTS:
+: (1 4 7)
+: (2 5 8)
+: (3 6 9)
+: #f
+
+Problem with this is in last =(map cdr m)= new =m= become ='(nil nil nil)= and this is not null in means of
+=(null?)=.
+
+#+begin_src racket :noweb eval :eval no
+(define (transpose m)
+  (if (null? m)
+      m
+      (cons (map car m)
+            (transpose (map cdr m)))))
+(transpose m1)
+#+end_src
+
+We know that all rows same column so =(car m)= never will be number just null.
+So we can take its =(cdr)= in consequent
+
+#+begin_src racket :noweb eval
+<<dot>>
+<<rand-data>>
+(define (transpose m)
+  (if (null? (car m))
+      (list)
+      (cons (map car m)
+            (transpose (map cdr m)))))
+
+(transpose m1)
+#+end_src
+
+#+RESULTS:
+: ((1 4 7) (2 5 8) (3 6 9))
+
+This one has repeating parts we know that =(accumulate)= takes an operator, initla value and a list.
+But we have nested lists so we need to use =(accumulate-n)=
+
+#+name: trans
+#+begin_src racket :noweb eval
+<<dot>>
+<<rand-data>>
+(define (transpose m)
+  (accumulate-n cons (list) m))
+#+end_src
+
+
+#+begin_src racket :noweb eval
+<<trans>>
+
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map
+     (lambda (row)
+       (map (lambda (col)
+              (dot-product row col))
+            cols))
+       m)))
+#+end_src
+
+But this doesn't fit question's format.
+In previous part we handled that one column, and now we have multiple columns.
+We can reuse previous =(matrix-*-vector)= but there is one problem.
+Because we have only one column at a time we are writing one column of the product.
+But it represented as a list.
+It's like this.
+
+First iteration
+
+\begin{bmatrix}
+x & _ & _ \\
+x & _ & _ \\
+x & _ & _ \\
+\end{bmatrix}
+
+Second
+
+\begin{bmatrix}
+x & y & _ \\
+x & y & _ \\
+x & y & _ \\
+\end{bmatrix}
+
+Last
+\begin{bmatrix}
+x & y & z \\
+x & y & z \\
+x & y & z \\
+\end{bmatrix}
+
+But in scheme it's like this
+#+begin_src racket :tangle no :eval no
+((x x x) (y y y) (z z z ))
+#+end_src
+
+So we need to transpose it.
+
+
+#+begin_src racket :noweb eval
+<<mv>>
+(define (transpose m)
+  (accumulate-n cons (list) m))
+
+(define (matrix-*-matrix m n)
+  (transpose
+   (map
+    (lambda (col)
+      (matrix-*-vector m col))
+    (transpose n))))
+
+(matrix-*-matrix m1 m2)
+#+end_src
+
+#+RESULTS:
+: ((9 12 15) (24 33 42) (39 54 69))
