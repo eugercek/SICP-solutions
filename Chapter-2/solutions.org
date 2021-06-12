@@ -1432,3 +1432,102 @@ So we need to transpose it.
 
 #+RESULTS:
 : ((9 12 15) (24 33 42) (39 54 69))
+* 2.38
+#+name: fold
+#+begin_src racket :noweb eval
+<<acc>>
+(define fold-right accumulate)
+
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+        result
+        (iter (op result (car rest))
+              (cdr rest))))
+  (iter initial sequence))
+#+end_src
+
+#+begin_src racket :noweb no-export
+<<fold>>
+(fold-right / 1 (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: 3/2
+
+This expands like this
+
+#+begin_src racket :tangle no :eval no
+(/ 1
+   (/ 2
+      (/ 3
+         1)))
+#+end_src
+
+#+begin_src racket :noweb eval
+<<fold>>
+(fold-left / 1 (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: 1/6
+
+This expands like this.
+#+begin_src racket :tangle no :eval no
+(/ (acc (cdr l)
+        1))
+
+(/
+ (/ (acc (cdr l))
+    2)
+ 1)
+
+(/
+ (/
+  (/ (acc (cdr l)
+          3))
+  2)
+ 1)
+
+(/
+ (/
+  (/ 1 3)
+  2)
+ 1)
+ #+end_src
+
+
+#+begin_src racket :noweb eval
+<<fold>>
+(fold-right list nil (list 1 2 3))
+(fold-left list nil (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (1 (2 (3 ())))
+: (((() 1) 2) 3)
+
+=+= gives same value with both fold.
+#+begin_src racket :noweb eval
+<<fold>>
+(fold-right + 0 (list 1 2 3))
+(fold-left + 0 (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: 6
+: 6
+
+Also I think below code is better explanation of =fold-left=
+#+begin_src racket
+(define (my/fold-left op initial seq)
+  (if (null? seq)
+      initial
+      (op (my/fold-left op initial (cdr seq))
+          (car seq))))
+
+(my/fold-left + 0 (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: 6
