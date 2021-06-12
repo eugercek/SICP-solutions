@@ -1526,8 +1526,61 @@ Also I think below code is better explanation of =fold-left=
       (op (my/fold-left op initial (cdr seq))
           (car seq))))
 
-(my/fold-left + 0 (list 1 2 3))
+(my/fold-left / 1 (list 1 2 3))
 #+end_src
 
 #+RESULTS:
-: 6
+: 1/6
+* 2.39
+I learned that Scheme is [[https://stackoverflow.com/questions/4578574/what-is-the-difference-between-lisp-1-and-lisp-2][LISP 1]].
+That's why there is no =()= around procedure names anymore.
+
+With =fold-right=
+#+begin_src racket :noweb no-export
+<<fold>>
+(define (reverse sequence)
+  (fold-right (lambda (x y)
+                    (append y (list x)))
+              nil sequence))
+(reverse (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (3 2 1)
+
+With =fold-left=
+I suggest you think through the recursive definition of =fold-left=.
+
+#+begin_src racket :noweb eval
+<<fold>>
+(define (rev sequence)
+  (fold-left (lambda (x y)
+               (append (list y) x))
+             nil sequence))
+
+(rev (list 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (3 2 1)
+
+Simple advice: Always imagine algorithm with 2 steps length.
+To see initial value in action and see the whole structure of recursion.
+
+=fold-right=
+#+begin_src racket :tangle no :eval no
+(reverse (list 1 2))
+
+(op 1
+    (op 2
+        nil))
+#+end_src
+
+=fold-left=
+#+begin_src racket :tangle no :eval no
+(reverse (list 1 2))
+
+(op (op nil
+        2)
+    1)
+#+end_src

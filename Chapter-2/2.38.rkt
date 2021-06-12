@@ -42,4 +42,4 @@
       (op (my/fold-left op initial (cdr seq))
           (car seq))))
 
-(my/fold-left + 0 (list 1 2 3))
+(my/fold-left / 1 (list 1 2 3))
