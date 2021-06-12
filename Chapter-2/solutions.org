@@ -369,7 +369,7 @@ In =(add-interval)= and =(sub-interval)= width of interval can be good parameter
 
 But in =(mul-interval)= and =(div-interval)= something changes.
 Functions must be give same output for same input.
-If our input source don't contain enough, that operatoin won't be a =function=.
+If our input source don't contain enough, that operation won't be a =function=.
 For example
 
 Width of =(make-interval 0 10)= is 10 also width of =(make-interval 100 110)= is 10.
@@ -476,7 +476,7 @@ TODO When I learn pattern matching, simple macros etc will beauty up this.
 To find something writing down equations.
 We know that $p_1$ and $p_2$ are small.
 To find lower bound of interval.
-I  think we can say that (in ver small numbers)
+I  think we can say that (in very small numbers)
 \[\frac{c_1(100-p_1)}{100} \frac{c_2(100-p_2)}{100} \approx \frac{c_1c_2(10^4 - 100(p_1 + p_2) +p_1p_2)}{10^4}\]
 
 $p_1p_2$ is multiplication of two small numbers to we can ignore it.
@@ -598,7 +598,7 @@ With pen and paper it can be seen that =(par2)= gives true output.
 : 0.025
 : 0.05
 
-Because boundraies are changed in =(mul-divide)= values are changed too.
+Because bound are changed in =(mul-divide)= values are changed too.
 * 2.17
 #+begin_src racket
 (define (last-pair elements)
@@ -819,7 +819,7 @@ Problem is =answer= has the previous values why it's on right side.
 #+RESULTS:
 : (9 4 1)
 
-In first =(cons)= probleem can seen. It evaluates this =(cons nil 1)=.
+In first =(cons)= problem can seen. It evaluates this =(cons nil 1)=.
 In second =(cons)= it evaluates =(cons (cons nil 1) 4)=
 It nests up to handle this, can use =(append)=.
 #+begin_src racket :noweb eval
@@ -1193,12 +1193,12 @@ And code works! There is too little to write I don't make mistake.
 #+RESULTS:
 : (22 26 30)
 
-Untill now always used map for computing something, but with =(car)=, =(map)= showed it potential for me.
+Until now always used map for computing something, but with =(car)=, =(map)= showed it potential for me.
 
 Also notice that =(map cdr seqs)= actually does =(cadr)= because it'll evaluate =(car)= in upper call.
 
 #+begin_quote
-But I started to worry about efficency from internet I learned I should don't care about efficency untill book say.
+But I started to worry about efficency from internet I learned I should don't care about efficency until book say.
 #+end_quote
 
 I said this in previous commit I didn't amend it because I think this is good case for writing
@@ -1215,7 +1215,7 @@ Which are described in any book on matrix algebra
 
 So I assume that these are normal matrix multiplication.
 If not, there will be problem with the fact that for matrix multiplication
-first element's column's nubmer must be same with second element's row's number.
+first element's column's number must be same with second element's row's number.
 
 #+name: rand-data
 #+begin_src racket :tangle no :eval no
@@ -1259,7 +1259,7 @@ And we represent =(list 1 2 3)= as
 
 We need to apply =(dot-product)=  on the list of rows.
 
-=(map)= gives elemetns of list once at time, since elements of list are rows we can what we want.
+=(map)= gives elements of list once at time, since elements of list are rows we can what we want.
 
 #+begin_src racket :noweb eval
 <<dot>>
@@ -1297,7 +1297,7 @@ But output look like
 50 \\
 \end{bmatrix}
 
-TODO But shoud look like
+TODO But should look like
 \begin{bmatrix}
 14 & 32 & 50
 \end{bmatrix}
@@ -1328,6 +1328,7 @@ Problem with this is in last =(map cdr m)= new =m= become ='(nil nil nil)= and t
 (define (transpose m)
   (if (null? m)
       m
+      
       (cons (map car m)
             (transpose (map cdr m)))))
 (transpose m1)
@@ -1351,7 +1352,7 @@ So we can take its =(cdr)= in consequent
 #+RESULTS:
 : ((1 4 7) (2 5 8) (3 6 9))
 
-This one has repeating parts we know that =(accumulate)= takes an operator, initla value and a list.
+This one has repeating parts we know that =(accumulate)= takes an operator, initial value and a list.
 But we have nested lists so we need to use =(accumulate-n)=
 
 #+name: trans
