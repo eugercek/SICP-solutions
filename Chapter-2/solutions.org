@@ -2,6 +2,7 @@
 #+TITLE: Solutions
 #+PROPERTY: header-args:racket  :lang sicp :exports both
 #+PROPERTY: header-args:racket+ :tangle (concat (nth 4 (org-heading-components)) ".rkt")
+#+PROPERTY: header-args:racket+ :noweb no-export
 
 * Procedures
 :PROPERTIES:
@@ -1583,4 +1584,58 @@ To see initial value in action and see the whole structure of recursion.
 (op (op nil
         2)
     1)
+#+end_src
+* TODO 2.44
+Add instructions for racket.
+#+begin_src racket :eval no
+(#%require sicp-pict)
+
+(define ei einstein)
+
+(define (right-split painter n)
+  (if (= n 0)
+      painter
+      (let ((smaller (right-split painter (- n 1))))
+        (beside painter (below smaller smaller)))))
+
+(define (up-split painter n)
+  (if (= n 0)
+      painter
+      (let
+          ((smaller (up-split painter (- n 1))))
+        (below painter
+               (beside smaller
+                       smaller)))))
+
+(define (square-limit painter n)
+  (let ((quarter (corner-split painter n)))
+    (let ((half (beside (flip-horiz quarter) quarter)))
+      (below (flip-vert half) half))))
+
+(define (corner-split painter n)
+  (if (= n 0)
+      painter
+      (let ((up (up-split painter (- n 1)))
+            (right (right-split painter (- n 1))))
+        (let ((top-left (beside up up))
+              (bottom-right (below right right))
+              (corner (corner-split painter (- n 1))))
+          (beside (below painter top-left)
+                  (below bottom-right corner))))))
+#+end_src
+* 2.45
+#+begin_src racket
+(define (split op1 op2)
+  (lambda (painter n)
+    (let ((small
+           ((split op1 op2)
+            painter (dec n))))
+      (if (= painter 0)
+        painter
+        (op1 painter
+             (op2 small
+                  small))))))
+
+(define right-split (split beside below))
+(define up-split (split below beside))
 #+end_src
