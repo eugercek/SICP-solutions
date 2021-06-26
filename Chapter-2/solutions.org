@@ -1639,3 +1639,31 @@ Add instructions for racket.
 (define right-split (split beside below))
 (define up-split (split below beside))
 #+end_src
+* 2.53
+#+name: memq
+#+begin_src racket :tangle no :eval no
+(define (memq item x)
+  (cond ((null? x) false)
+        ((eq? item (car x)) x)
+        (else (memq item (cdr x)))))
+#+end_src
+
+#+begin_src racket :noweb no-export
+<<memq>>
+(list 'a 'b 'c)
+(list (list 'george))
+(cdr '((x1 x2) (y1 y2)))
+(cadr '((x1 x2) (y1 y2)))
+(pair? (car '(a short list)))
+(memq 'red '((red shoes) (blue socks)))
+(memq 'red '(red shoes blue socks))
+#+end_src
+
+#+RESULTS:
+: (a b c)
+: ((george))
+: ((y1 y2))
+: (y1 y2)
+: #f
+: #f
+: (red shoes blue socks)
