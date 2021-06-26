@@ -1668,6 +1668,7 @@ Add instructions for racket.
 : #f
 : (red shoes blue socks)
 * 2.54
+#+name: equal?
 #+begin_src racket
 (define (equal? l1 l2)
     (define (both fn item)
@@ -1691,3 +1692,33 @@ Add instructions for racket.
     ((one-of atom? id) #f) ;; Cases like (equal? (list 1 (list 2)) (list 1 2))
     ((both list? car) (equal? (car l1) (car l2)))))
 #+end_src
+* 2.55
+#+begin_src racket
+(car ''abracadabra)
+#+end_src
+
+#+RESULTS:
+: quote
+
+Lets emulate what quote does with lists.
+With =equal?= function from previous exercise  we can see that those two lists are equal.
+
+#+begin_src racket :noweb no-export :lang racket
+;; '(quote (a b c))
+;; (list 'quote (list 'a  'b  'c))
+
+(equal? (quote (a b c))
+        (eval (list 'quote (list 'a 'b 'c)) (make-base-namespace)))
+#+end_src
+
+#+RESULTS:
+: #t
+
+#+begin_src racket :tangle no :eval no
+(quote (quote 'abracadabra))
+(quote (list 'quote 'abracadabra))
+(list 'quote (list 'quote 'abracadabra))
+#+end_src
+
+It's clearly seen that first element is quote.
+Because ='quote= means =(quote quote)= which is a function returns a sybol *without* evaluating it.
