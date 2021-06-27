@@ -11,7 +11,7 @@
     ((=number? a2 0) a1)
     ((and (number? a1)
           (number? a2))
-     (+ a1  a1))
+     (+ a1  a2))
     (else (list '+  a1 a2))))
 
 
@@ -29,8 +29,6 @@
 (define (product? x) (and (pair? x) (eq? (car x) '*)))
 (define (multiplier p) (cadr p))
 (define (multiplicand p) (caddr p))
-
-
 (define (deriv exp var)
   (cond ((number? exp) 0)
         ((variable? exp) (if (same-variable? exp var) 1 0))
