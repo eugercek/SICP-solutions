@@ -1830,7 +1830,7 @@ I assumed that =u= is a number.
 :results:
 '(+ 1 (* 5 (** x 4)))
 :end:
-* 2.57
+* TODO 2.57
 At first I said like ok sum is easy, them product ...
 But with in a second I remembered that we have recursion.
 
@@ -1928,3 +1928,81 @@ We can simplify more they both have very same structure.
 
 #+RESULTS:
 : (+ (* x (+ x x)) (* x x))
+* TODO 2.58
+#+name: only-deriv
+#+begin_src racket :tangle no :eval no
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        ((sum? exp) (make-sum (deriv (addend exp) var)
+                              (deriv (augend exp) var)))
+        ((product? exp)
+         (make-sum
+          (make-product (multiplier exp)
+                        (deriv (multiplicand exp) var))
+          (make-product (deriv (multiplier exp) var)
+                        (multiplicand exp))))
+        (else
+         (error "unknown expression type: DERIV" exp))))
+#+end_src
+
+#+name: predicates
+#+begin_src racket
+(define (sum? exp) (and (pair? exp) (eq? (cadr exp) '+)))
+(define (product? exp) (and (pair? exp) (eq? (cadr exp) '*)))
+#+end_src
+
+#+name: constructors
+#+begin_src racket
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2))
+         (+ a1 a2))
+        (else (list a1 '+ a2))))
+
+(define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list m1 '* m2))))
+#+end_src
+
+#+name: base-predicates
+#+begin_src racket :tangle no :eval no
+(define (variable? x) (symbol? x))
+
+(define (same-variable? v1 v2)
+  (and (variable? v1) (variable? v2) (eq? v1 v2)))
+
+(define (=number? exp num) (and (number? exp) (= exp num)))
+#+end_src
+
+
+We don't need to deal with more than two operand because it can't be :D
+
+#+name: selectors
+#+begin_src racket
+<<old-selectors>>
+(define (addend m) (car m))
+(define (augend m) (caddr m))
+
+(define (multiplier p) (car p))
+(define (multiplicand p) (caddr p))
+#+end_src
+
+#+begin_src racket :tangle no
+<<only-deriv>>
+<<predicates>>
+<<constructors>>
+<<selectors>>
+<<base-predicates>>
+
+(deriv '(x + (3 * x)) 'x)
+#+end_src
+
+#+RESULTS:
+: 4
+** b
+TODO
