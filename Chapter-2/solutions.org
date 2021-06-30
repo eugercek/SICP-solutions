@@ -1779,6 +1779,7 @@ Because ='quote= means =(quote quote)= which is a function returns a symbol *wit
         (else
          (error "unknown expression type: DERIV" exp))))
 #+end_src
+
 I had bad experience with =#lang sicp= in quotes sometimes it does weird things.
 So I suggest you to use =#lang racket= in these type of exercises.
 
@@ -2006,3 +2007,219 @@ We don't need to deal with more than two operand because it can't be :D
 : 4
 ** b
 TODO
+* foo
+#+name: rectangular-package
+#+begin_src racket :tangle no :eval no
+(define (install-rectangular-package)
+  ;; internal procedures
+  (define (real-part z) (car z))
+  (define (imag-part z) (cdr z))
+  (define (make-from-real-imag x y) (cons x y))
+  (define (magnitude z)
+    (sqrt (+ (square (real-part z))
+             (square (imag-part z)))))
+  (define (angle z)
+    (atan (imag-part z) (real-part z)))
+  (define (make-from-mag-ang r a)
+    (cons (* r (cos a)) (* r (sin a))))
+  ;; interface to the rest of the system
+  (define (tag x) (attach-tag 'rectangular x))
+  (put 'real-part '(rectangular) real-part)
+  (put 'imag-part '(rectangular) imag-part)
+  (put 'magnitude '(rectangular) magnitude)
+  (put 'angle '(rectangular) angle)
+  (put 'make-from-real-imag 'rectangular
+       (lambda (x y) (tag (make-from-real-imag x y))))
+  (put 'make-from-mag-ang 'rectangular
+       (lambda (r a) (tag (make-from-mag-ang r a))))
+  'done)
+#+end_src
+
+
+#+name: polar-package
+#+begin_src racket :tangle no :eval no
+(define (install-polar-package)
+  ;; internal procedures
+  (define (magnitude z) (car z))
+  (define (angle z) (cdr z))
+  (define (make-from-mag-ang r a) (cons r a))
+  (define (real-part z) (* (magnitude z) (cos (angle z))))
+  (define (imag-part z) (* (magnitude z) (sin (angle z))))
+  (define (make-from-real-imag x y)
+    (cons (sqrt (+ (square x) (square y)))
+          (atan y x)))
+  ;; interface to the rest of the system
+  (define (tag x) (attach-tag 'polar x))
+  (put 'real-part '(polar) real-part)
+  (put 'imag-part '(polar) imag-part)
+  (put 'magnitude '(polar) magnitude)
+  (put 'angle '(polar) angle)
+  (put 'make-from-real-imag 'polar
+       (lambda (x y) (tag (make-from-real-imag x y))))
+  (put 'make-from-mag-ang 'polar
+       (lambda (r a) (tag (make-from-mag-ang r a))))
+  'done)
+#+end_src
+
+#+name: apply-generic
+#+begin_src racket :tangle no :eval no
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+          (apply proc (map contents args))
+          (error
+           "No method for these types: APPLY-GENERIC"
+           (list op type-tags))))))
+#+end_src
+
+#+begin_src racket
+(define (attach-tag type-tag contents)
+  (cons type-tag contents))
+(define (square x) (expt x 2))
+<<rectangular-package>>
+<<polar-package>>
+<<apply-generic>>
+apply-generic
+#+end_src
+* 2.73
+:PROPERTIES:
+:header-args:racket+: :lang racket
+:END:
+I get =get= and =put= from http://community.schemewiki.org/?sicp-ex-2.73.
+
+#+name: table
+#+begin_src racket :tangle no :eval no
+(define *the-table* (make-hash));make THE table
+(define (put key1 key2 value) (hash-set! *the-table* (list key1 key2) value));put
+(define (get key1 key2) (hash-ref *the-table* (list key1 key2) #f));get
+#+end_src
+
+
+** a
+Dispatch is checking type of a datum and calling appropiate procedure.
+We can't add =number?= to the table because it has no row value, it don't have a operator to select form.
+You can't evaluate =(operator exp)= which is =(car exp)= to a number.
+Same is true for =variable?=
+** b
+:PROPERTIES:
+:header-args:racket+: :tangle 2.73-b.rkt
+:END:
+Because we get =(operands exp)= selectors will have one less =cdr=.
+#+begin_src racket :tangle 2.73.rkt
+(define (install-deriv-package)
+  (install-sum-package)
+  (install-product-package))
+#+end_src
+
+#+begin_src racket :tangle 2.73.rkt
+(define (install-sum-package)
+  ;; internal procedures
+  (define (variable? x) (symbol? x))
+  (define (same-variable? v1 v2)
+    (and (variable? v1) (variable? v2) (eq? v1 v2)))
+  (define (=number? exp num) (and (number? exp) (= exp num)))
+
+  (define (sum? x) (and (pair? x) (eq? (car x) '+)))
+  (define (addend s) (car s))
+  (define (augend s) (cadr s))
+
+  (define (make-sum a1 a2)
+    (cond
+      ((=number? a1 0) a2)
+      ((=number? a2 0) a1)
+      ((and (number? a1)
+            (number? a2))
+       (+ a1  a2))
+      (else (list '+  a1 a2))))
+
+  ;; interface to the rest of the system
+  (define (deriv-sum args)
+    (make-sum (deriv (addend args1))
+              (deriv (augend args2))))
+
+  (put 'deriv '+ deriv-sum))
+#+end_src
+
+
+#+begin_src racket
+(define (install-product-package)
+  ;; internal procedures
+  (define (variable? x) (symbol? x))
+  (define (same-variable? v1 v2)
+    (and (variable? v1) (variable? v2) (eq? v1 v2)))
+  (define (=number? exp num) (and (number? exp) (= exp num)))
+
+  (define (product? x) (and (pair? x) (eq? (car x) '*)))
+  (define (multiplier p) (cadr p))
+  (define (multiplicand p) (caddr p))
+
+  (define (make-product m1 m2)
+    (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+          ((=number? m1 1) m2)
+          ((=number? m2 1) m1)
+          ((and (number? m1) (number? m2)) (* m1 m2))
+          (else (list '* m1 m2))))
+
+  ;; interface to the rest of the system
+  (define (deriv-product args)
+    (make-sum
+     (make-product (multiplier exp)
+                   (deriv (multiplicand exp) var))
+     (make-product (deriv (multiplier exp) var)
+                   (multiplicand exp))))
+
+  (put 'deriv '* deriv-product))
+#+end_src
+** c
+:PROPERTIES:
+:header-args:racket+: :tangle 2.73-c.rkt
+:END:
+
+#+begin_src racket
+(define (install-exponent-package)
+  ;; internal procedures
+  (define (variable? x) (symbol? x))
+  (define (same-variable? v1 v2)
+    (and (variable? v1) (variable? v2) (eq? v1 v2)))
+  (define (=number? exp num) (and (number? exp) (= exp num)))
+
+  (define (product? x) (and (pair? x) (eq? (car x) '*)))
+  (define (multiplier p) (cadr p))
+  (define (multiplicand p) (caddr p))
+
+  (define (exponentiation? exp)
+    (and (pair? exp) (eq? (car exp) '**)
+         (variable? (cadr exp))
+         (number? (caddr exp))))
+
+  (define (base e) (cadr e))
+  (define (exponent e) (caddr e))
+
+  (define (make-exponentiation b e)
+    (cond
+      ((= e 0) 1)
+      ((= e 1) b)
+      (else
+       (list '** b e))))
+  (define (make-product m1 m2)
+    (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+          ((=number? m1 1) m2)
+          ((=number? m2 1) m1)
+          ((and (number? m1) (number? m2)) (* m1 m2))
+          (else (list '* m1 m2))))
+
+
+  ;; interface to the rest of the system
+  (define (deriv-exponent args)
+    (make-product (exponent exp)
+                  (make-product
+                   (make-exponentiation (base exp)
+                                        (- (exponent exp) 1))
+                   (deriv (base exp) var))))
+
+  (put 'deriv '** deriv-exponent))
+#+end_src
+** d
+We don't need to touch =deriv=.
+Just change the put statements in the package.
