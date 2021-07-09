@@ -1,0 +1,28 @@
+#+TITLE: Homework
+
+
+
+* 1
+#+begin_src racket
+(define-class (random-generator range)
+  (instance-vars (count 0))
+  (method (number)
+          (begin
+            (set! count (+ count 1))
+            (random range))))
+#+end_src
+* 2
+#+begin_src racket
+(define-class (coke-machine max-cokes price)
+  (instance-vars (cokes 0) (money 0))
+  (method (fill new-cokes)
+          (if (< max-cokes (+ cokes new-cokes))
+              "Don't have that much place!!"
+              (set! cokes (+ cokes new-cokes))))
+  (method (deposit income)
+          (set! money (+ money income)))
+  (method (coke)
+          (cond ((< money price) "Not Enough Money!!")
+                ((< cokes 1) "Machine Empty!!")
+                (else (- money price)))))
+#+end_src
