@@ -1,0 +1,38 @@
+#+TITLE: Lab
+
+* 1
+#+begin_src racket
+(define-class (person name)
+  (instance-vars (repeat '()))
+  (method (say stuff)
+          (begin
+            (set! repeat stuff)
+            stuff))
+  (method (ask stuff)
+          (ask self 'say (se '(would you please) stuff)))
+  (method (greet)
+          (begin
+            (set! repeat (ask self 'say (se '(hello my name is) name)))
+            repeat)))
+#+end_src
+* 2
+This works clearly
+#+begin_src racket
+(define-class (double-talker name)
+  (parent (person name))
+  (method (say stuff) (se stuff stuff)) )
+#+end_src
+
+
+#+begin_src racket
+(define-class (double-talker name)
+  (parent (person name))
+  (method (say stuff) (se (usual ’say stuff) (ask self ’repeat))) )
+#+end_src
+
+This has no problem too.
+#+begin_src racket
+(define-class (double-talker name)
+  (parent (person name))
+  (method (say stuff) (usual ’say (se stuff stuff))) )
+#+end_src
