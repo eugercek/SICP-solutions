@@ -8,12 +8,8 @@
           (begin
             (set! repeat stuff)
             stuff))
-  (method (ask stuff)
-          (ask self 'say (se '(would you please) stuff)))
-  (method (greet)
-          (begin
-            (set! repeat (ask self 'say (se '(hello my name is) name)))
-            repeat)))
+  (method (ask stuff) (ask self 'say (se '(would you please) stuff)))
+  (method (greet) (ask self 'say (se '(hello my name is) name))))
 #+end_src
 * 2
 This works clearly
@@ -24,6 +20,7 @@ This works clearly
 #+end_src
 
 
+This assumes that we have left to right evaluation.
 #+begin_src racket
 (define-class (double-talker name)
   (parent (person name))
