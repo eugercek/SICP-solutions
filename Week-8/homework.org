@@ -97,3 +97,22 @@ I don't know why but =do-times= didn't work properly so I implemented. *Without 
 #+end_src
 
 I need to wrap with =print= because stklos doesn't give return values.
+* 4
+#+begin_src racket
+(define (miss-manners obj)
+  (method (please message arg)
+          (ask obj message arg)))
+#+end_src
+* Extra
+This problem is called diamond problem.
+
+Example is [[https://en.wikipedia.org/wiki/Multiple_inheritance][from]]
+
+#+begin_src plantuml
+Object ==|> Rectangle
+Object ==|> Clickable
+Rectangle  ==> Button
+Clickable ==> Button
+#+end_src
+
+Assume that we need to respond =area= message it's more appropriate that Use =Rectangle='s =area= instead of =Object='s area.
