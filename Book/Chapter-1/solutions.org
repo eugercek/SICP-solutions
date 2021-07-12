@@ -1,11 +1,9 @@
 # -*- org-export-babel-evaluate: nil -*-
 #+TITLE: Solutions
 #+PROPERTY: header-args:racket  :lang sicp :exports both
-#+PROPERTY: header-args:racket+ :tangle (concat (car (org-get-outline-path)) "/" (nth 4 (org-heading-components)) ".rkt") :mkdirp yes
+#+PROPERTY: header-args:racket+ :tangle (concat (nth 4 (org-heading-components)) ".rkt")
 
-* Chapter-1
-** 1.01
-
+* 1.01
 #+begin_src racket
 10
 (+ 5 3 4)
@@ -43,7 +41,7 @@
 6
 16
 #+end_example
-** 1.02
+* 1.02
 
 #+begin_src racket
 (/ (+ 5
@@ -59,7 +57,7 @@
 
 #+RESULTS:
 : -37/150
-** TODO 1.03
+* TODO 1.03
 #+begin_quote
 Define a procedure that takes three numbers
 as arguments ...
@@ -80,7 +78,7 @@ in elisp.
 
 #+RESULTS:
 : 41
-** 1.04
+* 1.04
 
 It does $a + |b|$
 #+begin_src racket
@@ -98,7 +96,7 @@ It does $a + |b|$
 : 4
 : 6
 : 4
-** 1.05
+* 1.05
 
 Goes to infinite loop in scheme interpreters, because they use applicative order by default.
 
@@ -111,7 +109,7 @@ Goes to infinite loop in scheme interpreters, because they use applicative order
 
 (test 0 (p))
 #+end_src
-*** Normal Order
+** Normal Order
 :PROPERTIES:
 :header-args:racket: :tangle no
 :END:
@@ -136,10 +134,10 @@ whether the interpreter is using normal or applicative order: ..
 #+end_quote
 
 Because it's special form =(p)= will never evaluated.
-*** Applicative Order
+** Applicative Order
 First arguments will evaluted.
 =(p)= Compound procedure will create an infinite recursion.
-** 1.06
+* 1.06
 
 =new-if= is compound procedure which obeys applicative evaluation rules.
 So both clauses will have evaluated before substition for =new-if=.
@@ -164,7 +162,7 @@ And it's recursive, so there will be infinite recursion.
           guess
           (sqrt-iter (improve guess x) x)))
 #+end_src
-** 1.07
+* 1.07
 
 #+name: sqrt-functions
 #+begin_src racket :tangle no
@@ -234,7 +232,7 @@ Because value of =good-enough?= is already smaller than =0.001=.
 : 0.0009765625
 
 Can predict that it's harder to satisfy the =0.001= =good-enough?= criteria in big numbers.
-** 1.08
+* 1.08
 
 #+begin_src racket
 (define (cube-root-iter guess x)
@@ -261,7 +259,7 @@ Can predict that it's harder to satisfy the =0.001= =good-enough?= criteria in b
 
 #+RESULTS:
 : 2.000004911675504
-** 1.09
+* 1.09
 I don't know why but I can't change value of =+= in racket.
 So I changed =+= to =sum= from book.
 
@@ -297,7 +295,7 @@ Process has state that can be paused and could be resume.
 
 #+RESULTS:
 : 9
-** 1.10
+* 1.10
 :PROPERTIES:
 :header-args:racket: :tangle no
 :END:
@@ -321,14 +319,14 @@ Process has state that can be paused and could be resume.
 : 1024
 : 65536
 : 65536
-*** (f n)
+** (f n)
 
 $f(n) = 2n$
 #+begin_src racket
 (define (f n) (A 0 n))
 #+end_src
 
-*** (g n)
+** (g n)
 
 #+begin_src racket
 (define (g n) (A 1 n))
@@ -382,7 +380,7 @@ Therer will be =y= calls.
 
 So $g(n) = 2^n$
 
-*** (h n)
+** (h n)
 
 It can seen that each number will go through n times. because we stop at =y=1=
 
@@ -459,7 +457,7 @@ Also we can say
 : 2
 : 4
 : 16
-** 1.11
+* 1.11
 Question asks different process types, not procedure types so can (and probably must in scheme)
 use (tail) recursion.
 
@@ -491,7 +489,7 @@ Iterative
              fn-2 fn-1 fn))))
   (iter 0 0 1 2))
 #+end_src
-** 1.12
+* 1.12
 #+begin_src racket
 (define (pascal n)
   "Draws n depth pascal triangle"
@@ -534,7 +532,7 @@ Iterative
 :   1 2 1
 :  1 3 3 1
 : 1 4 6 4 1
-** 1.15
+* 1.15
 #+begin_src racket :lang racket
 (require racket/trace)
 (define (cube x) (* x x x))
@@ -579,7 +577,7 @@ If we make a number 3 times larger we need to divide one more time.
 It's $\theta(\log_3(n))$ in time.
 Space complexity is about x axis of the process.
 We are waiting new values in =(sine)= so it's $\theta(\log_3(n))$ in space too.
-** 1.16
+* 1.16
 #+begin_src racket
 (define (even? x)
   (= (remainder x 2) 0))
@@ -614,7 +612,7 @@ printf("%d\n", product);
 
 #+RESULTS:
 : 32
-** 1.17
+* 1.17
 In this program I assume that little one will halve more rapidly to one.
 But something like this can happen, =(product 15 16)= Bigger one will be 1 in 4 steps smaller one will be 1 in 5 steps.
 
@@ -641,7 +639,7 @@ But something like this can happen, =(product 15 16)= Bigger one will be 1 in 4 
 
 #+RESULTS:
 : 40
-** 1.18
+* 1.18
 #+begin_src racket
 (define (double x) (* x 2))
 (define (halve x)  (/ x 2))
@@ -656,7 +654,7 @@ But something like this can happen, =(product 15 16)= Bigger one will be 1 in 4 
       (iter a b 0)
       (iter b a 0)))
 #+end_src
-** 1.20
+* 1.20
 In Applicative Order
 =(remainder a b)= evaluated 4 times
 #+begin_src racket :lang racket
@@ -681,7 +679,7 @@ In Applicative Order
 In Normal Order
 Trick is in =(if)= everything beside =(remainder)= become pritimitive so it need to be evaluated.
 [[http://community.schemewiki.org/?sicp-ex-1.20][It's 18 times]]
-** 1.21
+* 1.21
 #+name: prime-functions
 #+begin_src racket
 (define (square x) (* x x))
@@ -712,7 +710,7 @@ Trick is in =(if)= everything beside =(remainder)= become pritimitive so it need
 : 199
 : 1999
 : 7
-** 1.22
+* 1.22
 #+begin_src racket :noweb eval
 <<prime-functions>>
 (define (timed-prime-test n)
@@ -755,7 +753,7 @@ Trick is in =(if)= everything beside =(remainder)= become pritimitive so it need
 
 Order of growth in time is $\theta(\sqrt{n})$ each should take $\sqrt{1000} \approx 31.6227$ times more time.
 Reason for using larger number is avoiding dealing with small number inconsistencies.
-** 1.23
+* 1.23
 #+begin_src racket :noweb eval
 <<prime-functions>>
 (define (timed-prime-test n)
@@ -785,7 +783,7 @@ Reason for using larger number is avoiding dealing with small number inconsisten
 #+end_src
 
 I've already done this kind of code in 1.22 so there won't be any performance change.
-** 1.24
+* 1.24
 #+name: fermat
 #+begin_src racket
 (define (square x) (* x x))
@@ -856,7 +854,7 @@ Difference with normal prime
 
 
 Can see why I choose larger number at 1.22  on =1000003= column. It's not very informative about data.
-** 1.25
+* 1.25
 #+begin_src racket
 (define (square x) (* x x))
 
@@ -897,7 +895,7 @@ We are reducing time of finding huge value it's still huge.
 
 On the other hand normal =(expmod)= takes reaminder of value each step.
 That's why it's not that big.
-** 1.26
+* 1.26
 Normal =(expmod)= is this.
 #+begin_src racket
 (define (expmod base exp m)
@@ -931,7 +929,7 @@ Difference is interpreter first evaluates operand and apply procedure on argumen
 So =(expmod base (/ exp 2) m)= won't call twice.
 Processs had an $\theta(\log_2(n))$ order of growth, it's reason is dividing 2 in each step.
 Since we are calling it twice we neutralized it so now it's $\theta(n)$.
-** 1.27
+* 1.27
 Carmichael Numbers listed in footnote: 561, 1105, 1729, 2465, 2821, 6601
 
 #+begin_src racket :noweb eval
@@ -973,7 +971,7 @@ Carmichael Numbers listed in footnote: 561, 1105, 1729, 2465, 2821, 6601
 : #t
 : #t
 : #t
-** 1.28
+* 1.28
 With random number a less than n, $a^{n-1} \equiv  1 \mod n$
 
 #+name: mr-test
@@ -1034,7 +1032,7 @@ Question says add it in =(square)=
 
 #+RESULTS:
 : #f
-** 1.29
+* 1.29
 #+name: sum
 #+begin_src racket :tangle no :eval no
 (define (sum term a next b)
@@ -1087,7 +1085,7 @@ Question says add it in =(square)=
 
 #+RESULTS:
 : 0.0003333333333333333
-** 1.30
+* 1.30
 #+begin_src racket
 (define (sum term a next b)
   (define (iter a result)
@@ -1106,7 +1104,7 @@ Question says add it in =(square)=
 
 #+RESULTS:
 : 55
-** TODO 1.31
+* TODO 1.31
 a
 
 Need to decide if inner =(iter)= procedure would be better.
@@ -1173,7 +1171,7 @@ b
         (iter (next x) (* (term x) acc))))
   (iter a 1))
 #+end_src
-** 1.32
+* 1.32
 Changed my version to one procedure one to find diferences more easy.
 
 #+begin_src racket :tangle no :eval  never
@@ -1235,7 +1233,7 @@ b
 (define (sum term a next b)
   (accumulator + 0 term a next b))
 #+end_src
-** 1.33
+* 1.33
 a
 
 #+name: filtered-accumulate
@@ -1279,7 +1277,7 @@ b
   (filtered-accumulate * 1 (lambda (x) x) 2 inc b (lambda (x)
                                                     (= (gcd x b) 1))))
 #+end_src
-** 1.34
+* 1.34
 #+begin_src racket
 (define (f g) (g 2))
 (f f)
@@ -1294,7 +1292,7 @@ It will be do something like this
 #+end_src
 
 And there is error 2 is not a procedure that can be applied to arguments.
-** 1.35
+* 1.35
 #+name: fixed-point
 #+begin_src racket
 (define (fixed-point f first-guess)
@@ -1318,7 +1316,7 @@ And there is error 2 is not a procedure that can be applied to arguments.
 #+RESULTS:
 : 1.6180327868852458
 
-** 1.36
+* 1.36
 #+begin_src racket
 (define (fixed-point f first-guess)
   (define tolerance 0.00001)
@@ -1375,7 +1373,7 @@ And there is error 2 is not a procedure that can be applied to arguments.
 4.555532270803653
 4.555532270803653
 #+end_example
-** 1.37
+* 1.37
 a
 
 $1/\phi \approx 0.61803398875$
@@ -1439,7 +1437,7 @@ But in iteratives, it's more easy to write bottom up.
 #+RESULTS:
 : 0.6179775280898876
 : 0.6180555555555556
-** 1.38
+* 1.38
 Repeating pattern is.
 
 | mod 3  | 0 | 1 | 2 | 0 | 1 | 2 |
@@ -1467,7 +1465,7 @@ Repeating pattern is.
 
 #+RESULTS:
 : 2.7182817182817183
-** TODO 1.39
+* TODO 1.39
 I need to find naming convention for iterator procedure in recursive processes.
 #+begin_src racket
 (define (tan-cf x k)
@@ -1484,7 +1482,7 @@ I need to find naming convention for iterator procedure in recursive processes.
 
 #+RESULTS:
 : 1.557407724654902
-** 1.40
+* 1.40
 #+name: newton
 #+begin_src racket :tangle no :eval no :noweb eval
 <<fixed-point>>
@@ -1513,7 +1511,7 @@ I need to find naming convention for iterator procedure in recursive processes.
 
 #+RESULTS:
 : -1.2756822036498454
-** 1.41
+* 1.41
 #+begin_src racket
 (define (double f)
   (lambda (x)
@@ -1533,7 +1531,7 @@ I need to find naming convention for iterator procedure in recursive processes.
 #+RESULTS:
 : 21
 
-** 1.42
+* 1.42
 #+name: compose
 #+begin_src racket
 (define (compose f g)
@@ -1548,7 +1546,7 @@ I need to find naming convention for iterator procedure in recursive processes.
 
 #+RESULTS:
 : 49
-** 1.43
+* 1.43
 Without =(compose)=
 
 #+begin_src racket
@@ -1580,7 +1578,7 @@ With =(compose)=
       f
       (compose f (repeated f (- n 1)))))
 #+end_src
-** 1.44
+* 1.44
 #+begin_src racket :noweb eval
 <<repeated>>
 (define (smooth f)
