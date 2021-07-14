@@ -2171,7 +2171,9 @@ Mixed changes
 
 #+RESULTS:
 : (1 + ((x * 2) + (x + x)))
-* 2.59
+
+* TODO 2.59
+I should make =union-set= more robust
 #+name: set-e
 #+begin_src racket :tangle no :eval no
 (define (element-of-set? x set)
@@ -2276,7 +2278,33 @@ This is $\theta(n)$
 #+RESULTS:
 : (1 2 3 5)
 : (1 2 3)
-* COMMENT foo
+* TODO 2.62
+I should make =union-set= more robust.
+
+This is $\theta(n)$ (which reduces from 2n).
+
+#+begin_src racket
+(define (union-set s1 s2)
+  (cond ((null? s1) s2)
+        ((null? s2) s1)
+        (else
+         (let ((x1 (car s1)) (x2 (car s2)))
+           (cond ((= x1 x2)
+                  (cons x1 (union-set (cdr s1) (cdr s2))))
+                 ((< x1 x2)
+                  (cons x1 (union-set (cdr s1) s2)))
+                 ((< x2 x1)
+                  (cons x2 (union-set s1 (cdr s2)))))))))
+
+(union-set (list 1 2 3) (list 4 5 6))
+(union-set (list 1 2 3) (list 0 4))
+#+end_src
+
+#+RESULTS:
+: (1 2 3 4 5 6)
+: (0 1 2 3 5)
+
+ COMMENT foo
 #+name: rectangular-package
 #+begin_src racket :tangle no :eval no
 (define (install-rectangular-package)
