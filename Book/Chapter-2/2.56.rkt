@@ -55,6 +55,7 @@
        (number? (caddr exp))))
 
 (define (base e) (cadr e))
+
 (define (exponent e) (caddr e))
 
 (define (make-exponentiation b e)

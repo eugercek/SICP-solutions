@@ -85,9 +85,11 @@
                         (multiplicand exp))))
         (else
          (error "unknown expression type: DERIV" exp))))
+(define (last-exp? x) (null? (cdr x)))
+
 (define (augend s)
   (define (work exp)
-    (if (null? (cdr exp))
+    (if (last-exp? exp)
         (car exp)
         (make-sum (car exp)
                   (work (cdr exp)))))
@@ -95,7 +97,7 @@
 
 (define (multiplicand s)
   (define (work exp)
-    (if (null? (cdr exp))
+    (if (last-exp? exp)
         (car exp)
         (make-product (car exp)
                   (work (cdr exp)))))

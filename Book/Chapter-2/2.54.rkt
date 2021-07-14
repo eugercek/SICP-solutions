@@ -1,3 +1,9 @@
+(define (remove elem seq)
+  (if (eq? elem (car seq))
+      (cdr seq)
+      (cons (car seq)
+            (remove elem (cdr seq)))))
+
 (define (equal? l1 l2)
     (define (both fn item)
       (and (fn (item l1))

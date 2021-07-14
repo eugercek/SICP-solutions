@@ -1329,7 +1329,7 @@ Problem with this is in last =(map cdr m)= new =m= become ='(nil nil nil)= and t
 (define (transpose m)
   (if (null? m)
       m
-      
+
       (cons (map car m)
             (transpose (map cdr m)))))
 (transpose m1)
@@ -1831,6 +1831,7 @@ I assumed that =u= is a number.
        (number? (caddr exp))))
 
 (define (base e) (cadr e))
+
 (define (exponent e) (caddr e))
 
 (define (make-exponentiation b e)
@@ -2023,10 +2024,22 @@ We don't need to deal with more than two operand because it it's impossible :D
 <<constructors>>
 <<selectors>>
 <<base-predicates>>
+(define (calculate x)
+  (cond ((null? x) 0)
+        ((number? x) x)
+        ((sum? x) (make-sum (calculate (addend x))
+                            (calculate (augend x))))
+        ((product? x) (make-product (calculate (multiplier x))
+                                    (calculate (multiplicand x))))
+        (else (error "Can't calculate form -- CALCULATE"
+                     x))))
 (deriv '(x + (x * x)) 'x)
 #+end_src
 
-** b
+#+RESULTS:
+: 3
+
+** TODO b
 :PROPERTIES:
 :header-args:racket+: :tangle no
 :END:
@@ -2037,10 +2050,31 @@ Summation changes
 (1 + (2 + 3)) => (1 + 2 + 3)
 #+end_src
 
+
 Multiplication changes
 #+begin_src racket :tangle no :eval no
 (1 * (2 * 3)) => (1 * 2 * 3)
 #+end_src
+
+=addend= of expression is same but =augend= is different.
+#+begin_src racket :tangle no :eval no
+(define (sum? exp) (and (pair? exp) (eq? (cadr exp) '+)))
+
+(define (make-sum a1 a2)
+  (cond
+    ((null? a2 ) a1)
+    ((=number? a1 0) a2)
+    ((=number? a2 0) a1)
+    ((and (number? a1) (number? a2))
+     (+ a1 a2))
+    (else (list a1 '+ a2))))
+
+(define (addend m) (car m))
+
+(define (augend s)
+  (if ))
+#+end_src
+
 
 Mixed changes
 
@@ -2048,38 +2082,68 @@ Mixed changes
 (1 + (2  * 3)) => (1 + 2 * 3)
 #+end_src
 
-#+begin_quote
-We don't need to deal with more than two operand because it it's impossible :D
-#+end_quote
-I was wrong ...
 
-#+begin_src racket
-(x + 3 * (x + y + 2))
+We will use lots of =car= =cdr= so, I implemented =nth=
+#+name: nth
+#+begin_src racket :tangle no :eval no
+(define (nth n seq)
+  (if (= 0 n)
+      (car seq)
+      (nth (- n 1) (cdr seq))))
 #+end_src
 
-#+name: deriv-sum
-#+begin_src racket
+
+#+begin_src racket :tangle no :eval no
 (define (sum? exp) (and (pair? exp) (eq? (cadr exp) '+)))
 
 (define (make-sum a1 a2)
-  (cond ((=number? a1 0) a2)
-        ((=number? a2 0) a1)
-        ((and (number? a1) (number? a2))
-         (+ a1 a2))
-        (else (list a1 '+ a2))))
+  (cond
+    ((null? a2 ) a1)
+    ((=number? a1 0) a2)
+    ((=number? a2 0) a1)
+    ((and (number? a1) (number? a2))
+     (+ a1 a2))
+    (else (list a1 '+ a2))))
 
 (define (addend m) (car m))
-(define (augend m)
-  (make-sum
-   (cadr m)
-   (if (null? (caddr m))
-       0
-       (caddr m))))
+
+(define (augend s)
+  (define fake-augend (cddr ))
+  (cond ((= ))))
 #+end_src
 
 
+#+end_src
+
+
+Mixed changes
+
+#+begin_src racket :tangle no :eval no
+(1 + (2  * 3)) => (1 + 2 * 3)
+#+end_src
+
+
+#+name: deriv-sum
+#+begin_src racket :tangle no :eval no
+(define (sum? exp) (and (pair? exp) (eq? (cadr exp) '+)))
+
+(define (make-sum a1 a2)
+  (cond
+    ((null? a2 ) a1)
+    ((=number? a1 0) a2)
+    ((=number? a2 0) a1)
+    ((and (number? a1) (number? a2))
+     (+ a1 a2))
+    (else (list a1 '+ a2))))
+
+(define (addend m) (car m))
+
+(define (augend s)
+  ;;)
+#+end_src
+
 #+name: deriv-product
-#+begin_src racket
+#+begin_src racket :tangle no :eval no
 (define (product? exp) (and (pair? exp) (eq? (cadr exp) '*)))
 
 (define (make-product m1 m2)
@@ -2089,23 +2153,69 @@ I was wrong ...
         ((and (number? m1) (number? m2)) (* m1 m2))
         (else (list m1 '* m2))))
 
-(define (multiplier p) (car p))
-(define (multiplicand m)
-  (make-product
-   (cadr m)
-   (if (null? (caddr m))
-       1
-       (caddr m))))
+(define (multiplier m) (car m))
+
+(define (multiplicand p)
+  ;;)
 #+end_src
+
+
 
 #+begin_src racket :tangle 2.58-b.rkt
 <<only-deriv>>
 <<deriv-sum>>
 <<deriv-product>>
 <<base-predicates>>
-(deriv '(x + (x * x)) 'x)
+(deriv '(x + x * x + x) 'x)
 #+end_src
-* foo
+
+#+RESULTS:
+: (1 + ((x * 2) + (x + x)))
+* 2.59
+#+name: set-e
+#+begin_src racket :tangle no :eval no
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+        ((equal? x (car set)) true)
+        (else (element-of-set? x (cdr set)))))
+#+end_src
+
+#+name: set-a
+#+begin_src racket :tangle no :eval no
+(define (adjoin-set x set)
+  (if (element-of-set? x set)
+      set
+      (cons x set)))
+#+end_src
+
+
+#+name: set-i
+#+begin_src racket :tangle no :eval no
+(define (intersection-set set1 set2)
+  (cond ((or (null? set1) (null? set2)) '())
+        ((element-of-set? (car set1) set2)
+         (cons (car set1) (intersection-set (cdr set1) set2)))
+        (else (intersection-set (cdr set1) set2))))
+#+end_src
+
+#+begin_src racket
+<<set-e>>
+<<set-a>>
+<<set-i>>
+(define (union-set s1 s2)
+  (cond ((null? s1) s2)
+        ((element-of-set? (car s1) s2)
+         (union-set (cdr s1) s2))
+        (else
+         (cons (car s1) (union-set (cdr s1) s2)))))
+
+(union-set (list 1 2 3) (list 4 5 6 1 2 3))
+#+end_src
+
+#+RESULTS:
+: (4 5 6 1 2 3)
+
+* COMMENT foo
 #+name: rectangular-package
 #+begin_src racket :tangle no :eval no
 (define (install-rectangular-package)
