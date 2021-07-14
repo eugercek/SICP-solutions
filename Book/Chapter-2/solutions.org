@@ -2215,6 +2215,48 @@ Mixed changes
 #+RESULTS:
 : (4 5 6 1 2 3)
 
+* 2.60
+
+=element-of-set?=  is same we need to go $\theta(n)$
+
+#+begin_src racket :tangle no :eval no
+(define (element-of-set? x set)
+  (cond ((null? set) false)
+        ((equal? x (car set)) true)
+        (else (element-of-set? x (cdr set)))))
+#+end_src
+
+Now this is $\theta(n)$
+
+#+begin_src racket :tangle no :eval no
+(define (adjoin-set x set)
+  (cons x set))
+#+end_src
+
+=intersection-of-set=  is same we need to go $\theta(n^2)$
+
+#+begin_src racket :tangle no :eval no
+(define (intersection-set set1 set2)
+  (cond ((or (null? set1) (null? set2)) '())
+        ((element-of-set? (car set1) set2)
+         (cons (car set1) (intersection-set (cdr set1) set2)))
+        (else (intersection-set (cdr set1) set2))))
+#+end_src
+
+=append= is and $\theta(n)$ procedure so =union-set= is $\theta(n)$ too
+#+begin_src racket
+<<set-e>>
+<<set-a>>
+<<set-i>>
+(define (union-set s1 s2)
+  (append s1 s2))
+
+(union-set (list 1 2 3) (list 4 5 6 1 2 3)
+#+end_src
+
+#+RESULTS:
+: (1 2 3 4 5 6 1 2 3)
+
 * COMMENT foo
 #+name: rectangular-package
 #+begin_src racket :tangle no :eval no
