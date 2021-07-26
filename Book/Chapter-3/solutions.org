@@ -1,0 +1,25 @@
+# -*- org-export-babel-evaluate: nil -*-
+#+TITLE: Solutions
+#+PROPERTY: header-args:racket  :lang sicp :exports both
+#+PROPERTY: header-args:racket+ :tangle (concat (nth 4 (org-heading-components)) ".rkt")
+#+PROPERTY: header-args:racket+ :noweb no-export
+
+* 3.01
+Last main is the return value.
+In =begin= last argument is the return value, previous ones are probably mutating (destructive) functions.
+
+#+begin_src racket
+(define (make-accumulator main)
+  (lambda (income)
+    (begin
+      (set! main (+ main income))
+      main)))
+
+(define acc (make-accumulator 100))
+(acc 0)
+(acc 10)
+#+end_src
+
+#+RESULTS:
+: 100
+: 110
