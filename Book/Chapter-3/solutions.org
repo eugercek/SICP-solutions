@@ -130,3 +130,53 @@ In =begin= last argument is the return value, previous ones are probably mutatin
 : 6 "Incorrect password"
 : 7 "Incorrect password"
 : "Naaani Naaani Naaani"
+* 3.05
+#+name: monte-carlo
+#+begin_src racket :tangle no :eval no
+(define (monte-carlo trials experiment)
+  (define (iter trials-remaining trials-passed)
+    (cond ((= trials-remaining 0)
+           (/ trials-passed trials))
+          ((experiment)
+           (iter (- trials-remaining 1)
+                 (+ trials-passed 1)))
+          (else
+           (iter (- trials-remaining 1)
+                 trials-passed))))
+  (iter trials 0))
+#+end_src
+
+We need float random value because if we say get random value in th range of [-1,1] it'll give wrong results.
+Also use =#lang racket=
+#+name: random-in-range
+#+begin_src racket :tangle no :eval no
+ (define (random-in-range low high)
+   (let ((range (- high low)))
+     (+ low (* (random) range))))
+#+end_src
+
+
+#+begin_src racket :lang racket
+<<monte-carlo>>
+<<random-in-range>>
+(define (estimate-integral P x1 x2 y1 y2 trial)
+  (let ((test (lambda ()
+                (P (random-in-range x1 x2)
+                   (random-in-range y1 y2))))
+        (rect-area (abs (* (- x2 x1)
+                          (- y2 y1)))))
+    (* rect-area
+       (monte-carlo trial test))))
+
+;; (x-1)^2 + (y-1)^2 <= 1
+(define (unit-circle x y) ; Kind of in-unit-circle?
+  (define (square x) (* x x))
+  (<= (+ (square x)
+         (square y))
+      1))
+
+(estimate-integral unit-circle -1.0 1.0 -1.0 1.0 10000)
+#+end_src
+
+#+RESULTS:
+: 3.1336
