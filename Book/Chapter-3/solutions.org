@@ -180,3 +180,36 @@ Also use =#lang racket=
 
 #+RESULTS:
 : 3.1336
+* 3.06
+For simple debug I declared these
+#+name: defs
+#+begin_src racket :tangle no :eval no
+(define random-init 100)
+(define (rand-update x) (+ x 1)) ; :D
+#+end_src
+
+#+begin_src racket
+<<defs>>
+(define rand
+  (let ((x random-init))
+    (define (generate)
+      (set! x (rand-update x))
+      x)
+    (define (reset new)
+      (set! x new)
+      x)
+    (define  (dispatch sym)
+      (cond ((eq? sym 'generate) (generate))
+            ((eq? sym 'reset) reset)
+            (else (error "Invalid message"))))
+    dispatch))
+
+(rand 'generate)
+((rand 'reset) 500)
+(rand 'generate)
+#+end_src
+
+#+RESULTS:
+: 101
+: 500
+: 501
