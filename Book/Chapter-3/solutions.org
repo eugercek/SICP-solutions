@@ -79,3 +79,54 @@ In =begin= last argument is the return value, previous ones are probably mutatin
 #+RESULTS:
 : 60
 : "Incorrect password"
+* 3.04
+#+begin_src racket :lang racket
+(define (make-account balance passwd)
+  (let ((try-time 0))
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+          "Insufficient funds"))
+    (define (deposit amount)
+      (set! balance (+ balance amount))
+      balance)
+    (define (passwd-error arg)             ; Need arg because dispatched procedure takes argument
+      (begin
+        (set! try-time (+ try-time 1))
+        (display try-time)
+        (display " ")
+        "Incorrect password"))
+    (define (call-the-cops arg)
+      "Naaani Naaani Naaani")
+
+    (define (dispatch *** m)              ; Because passwords look like *** , lisp joke
+      (define brute-force? (lambda () (= try-time 7)))
+      (cond ((brute-force?) call-the-cops)
+            ((not  (eq? *** passwd)) passwd-error)
+            ((eq? m 'withdraw) withdraw)
+            ((eq? m 'deposit) deposit)
+            (else (error "Unknown request: MAKE-ACCOUNT"
+                         m))))
+    dispatch))
+
+(define acc (make-account 100 'secret-password))
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+((acc 'some-other-password 'deposit) 50)
+#+end_src
+
+#+RESULTS:
+: 1 "Incorrect password"
+: 2 "Incorrect password"
+: 3 "Incorrect password"
+: 4 "Incorrect password"
+: 5 "Incorrect password"
+: 6 "Incorrect password"
+: 7 "Incorrect password"
+: "Naaani Naaani Naaani"
