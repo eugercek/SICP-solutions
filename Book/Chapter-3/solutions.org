@@ -253,3 +253,45 @@ For simple debug I declared these
 : 60
 : "Incorrect password"
 : 40
+* 3.08
+Finding normal order for testing
+
+#+begin_src racket
+(+ (begin (display "Left\n") 1)
+   (begin (display "Right\n") 2))
+#+end_src
+
+#+RESULTS:
+: Left
+: Right
+: 3
+
+
+#+name: f
+#+begin_src racket :tangle no :eval no
+(define f
+  (let ((prev 0))
+    (lambda (x)
+      (let ((cur prev))
+        (begin
+          (set! prev x)
+          cur)))))
+#+end_src
+
+Left to right
+#+begin_src racket
+<<f>>
+(+ (f 0) (f 1))
+#+end_src
+
+#+RESULTS:
+: 0
+
+Right to left (emulation)
+#+begin_src racket :noweb eval
+<<f>>
+(+ (f 1) (f 0))
+#+end_src
+
+#+RESULTS:
+: 1
