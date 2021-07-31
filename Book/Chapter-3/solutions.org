@@ -295,3 +295,8 @@ Right to left (emulation)
 
 #+RESULTS:
 : 1
+* TODO 3.09 :plantuml:
+This is good enough
+http://community.schemewiki.org/?sicp-ex-3.9
+
+Do it in plantuml
